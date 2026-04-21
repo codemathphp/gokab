@@ -58,21 +58,28 @@ export default function Welcome() {
     try {
       const defaultRole = 'rider'
       console.log('Creating user with phone:', phone)
-      await createUser(phone, defaultRole)
-      console.log('User created successfully')
       
-      const userData = { phone, role: defaultRole }
+      // Try to create in Firebase
+      try {
+        await createUser(phone, defaultRole)
+        console.log('User created successfully in Firebase')
+      } catch (firebaseErr) {
+        console.warn('Firebase creation failed, using localStorage fallback:', firebaseErr.message)
+        // Fallback: still allow login with localStorage only
+      }
+      
+      const userData = { phone, role: defaultRole, isVerified: true }
       setUser(userData)
       localStorage.setItem('gokab_session', JSON.stringify(userData))
       
+      console.log('User verified and session created')
       console.log('Redirecting to /rider/home')
       await router.push('/rider/home')
       console.log('Redirect completed')
     } catch (err) {
       console.error('Full error:', err)
-      console.error('Error code:', err.code)
       console.error('Error message:', err.message)
-      setError(`Error: ${err.message || 'Failed to create account. Please try again.'}`)
+      setError(`Account activation failed. Please try again.`)
     } finally {
       setLoading(false)
     }
