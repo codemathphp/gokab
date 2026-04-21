@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "840064106231",
+    "project_id": "gokab-5b404",
+    "storage_bucket": "gokab-5b404.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840064106231:android:73e48cfbb082af3dbd5df2",
+        "android_client_info": {
+          "package_name": "com.gokab.gokab"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUHdxSrm1uBu-XC8Pj62JdkKPe8Z34-Eg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

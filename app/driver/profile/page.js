@@ -1,0 +1,93 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/lib/store'
+import { useEffect } from 'react'
+
+export default function DriverProfile() {
+  const router = useRouter()
+  const { user, logout } = useAuthStore()
+
+  useEffect(() => {
+    if (!user || user.role !== 'driver') {
+      router.push('/welcome')
+    }
+  }, [user, router])
+
+  const handleLogout = () => {
+    logout()
+    localStorage.removeItem('gokab_session')
+    router.push('/welcome')
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="bg-primary text-white p-6 pt-8 pb-12">
+        <button onClick={() => router.back()} className="text-xl mb-4">
+          ←
+        </button>
+        <h1 className="text-2xl font-bold">Driver Profile</h1>
+      </div>
+
+      <div className="max-w-md mx-auto px-4 py-6 -mt-6">
+        {/* Profile Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="text-center mb-6">
+            <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-5xl mx-auto mb-4">
+              👤
+            </div>
+            <h2 className="text-2xl font-bold text-secondary">{user?.phone}</h2>
+            <p className="text-gray-600">Professional Driver</p>
+          </div>
+
+          {/* Rating */}
+          <div className="text-center py-4 border-t border-b border-gray-200 mb-6">
+            <p className="text-3xl font-bold text-primary">4.8 ⭐</p>
+            <p className="text-gray-600 text-sm">Based on 127 rides</p>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-primary">$892.50</p>
+              <p className="text-xs text-gray-600">Total Earnings</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-accent">127</p>
+              <p className="text-xs text-gray-600">Total Rides</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Menu Items */}
+        <div className="space-y-3 mb-8">
+          <button className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+            <span className="font-semibold text-secondary">Vehicle Details</span>
+            <span>→</span>
+          </button>
+          <button className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+            <span className="font-semibold text-secondary">Earnings & Payouts</span>
+            <span>→</span>
+          </button>
+          <button className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+            <span className="font-semibold text-secondary">Documents</span>
+            <span>→</span>
+          </button>
+          <button className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+            <span className="font-semibold text-secondary">Help & Support</span>
+            <span>→</span>
+          </button>
+        </div>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full py-4 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  )
+}
