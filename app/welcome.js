@@ -9,15 +9,13 @@ import { createUser, getUser } from '@/lib/firebaseServices'
 export default function Welcome() {
   const router = useRouter()
   const { setUser } = useAuthStore()
-  const [step, setStep] = useState('role') // role, phone, verify
-  const [role, setRole] = useState(null)
+  const [step, setStep] = useState('terms') // terms, phone, verify
   const [phone, setPhone] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleRoleSelect = (selectedRole) => {
-    setRole(selectedRole)
+  const handleTermsAccept = () => {
     setStep('phone')
   }
 
@@ -31,23 +29,12 @@ export default function Welcome() {
     setLoading(true)
     try {
       const formattedPhone = formatPhone(phone)
-      const existingUser = await getUser(formattedPhone)
-
-      if (existingUser && existingUser.role === role) {
-        // User exists, proceed to verification
-        const code = generateVerificationCode()
-        setVerificationCode(code)
-        setPhone(formattedPhone)
-        setStep('verify')
-      } else if (!existingUser) {
-        // New user
-        const code = generateVerificationCode()
-        setVerificationCode(code)
-        setPhone(formattedPhone)
-        setStep('verify')
-      } else {
-        setError('This phone number is already registered with a different role')
-      }
+      
+      // Generate verification code
+      const code = generateVerificationCode()
+      setVerificationCode(code)
+      setPhone(formattedPhone)
+      setStep('verify')
     } catch (err) {
       console.error(err)
       setError('Please enter a valid phone number')
@@ -61,18 +48,13 @@ export default function Welcome() {
     if (enteredCode === verificationCode) {
       setLoading(true)
       try {
-        await createUser(phone, role)
-        const userData = { phone, role }
+        const defaultRole = 'rider'
+        await createUser(phone, defaultRole)
+        const userData = { phone, role: defaultRole }
         setUser(userData)
         localStorage.setItem('gokab_session', JSON.stringify(userData))
-
-        if (role === 'driver') {
-          router.push('/driver/onboarding')
-        } else if (role === 'admin') {
-          router.push('/admin/dashboard')
-        } else {
-          router.push('/rider/home')
-        }
+        
+        router.push('/rider/home')
       } catch (err) {
         setError('Error creating account')
         console.error(err)
@@ -86,8 +68,8 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
-      {step === 'role' && (
-        <RoleSelection onRoleSelect={handleRoleSelect} />
+      {step === 'terms' && (
+        <TermsScreen onAccept={handleTermsAccept} />
       )}
 
       {step === 'phone' && (
@@ -95,7 +77,6 @@ export default function Welcome() {
           phone={phone}
           setPhone={setPhone}
           onSubmit={handlePhoneSubmit}
-          onBack={() => setStep('role')}
           error={error}
           loading={loading}
         />
@@ -105,7 +86,6 @@ export default function Welcome() {
         <VerifyCode
           phone={phone}
           onVerify={handleCodeVerify}
-          onBack={() => setStep('phone')}
           error={error}
           loading={loading}
         />
@@ -114,11 +94,11 @@ export default function Welcome() {
   )
 }
 
-function RoleSelection({ onRoleSelect }) {
+function TermsScreen({ onAccept }) {
   return (
-    <div className="w-full max-w-sm text-center">
+    <div className="w-full max-w-sm flex flex-col">
       {/* Logo */}
-      <div className="mb-8">
+      <div className="mb-8 text-center">
         <svg
           className="w-16 h-16 mx-auto mb-2"
           viewBox="0 0 100 100"
@@ -135,47 +115,36 @@ function RoleSelection({ onRoleSelect }) {
         <p className="text-gray-500 text-xs mt-1">Travel in Smart Style</p>
       </div>
 
-      <h2 className="text-xl font-bold text-secondary mb-1">Get Started</h2>
-      <p className="text-gray-600 text-sm mb-6">Choose your role</p>
+      {/* Placeholder area */}
+      <div className="w-full h-48 bg-gray-200 rounded-lg mb-8"></div>
+
+      {/* Content */}
+      <h2 className="text-2xl font-bold text-secondary mb-4 text-center">Welcome To GoKab</h2>
+      
+      <p className="text-gray-700 text-sm text-center mb-6">
+        Please <span className="text-primary font-semibold">Read</span> through our{' '}
+        <span className="text-primary font-semibold underline">Privacy Policy</span>. To start using{' '}
+        <span className="font-semibold">GOKAB</span> Tap Agree and Continue to{' '}
+        <span className="text-primary font-semibold underline">Agree to our Terms of Service</span>.
+      </p>
 
       <button
-        onClick={() => onRoleSelect('rider')}
-        className="w-full py-3 mb-3 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-orange-600 transition-colors"
+        onClick={onAccept}
+        className="w-full py-4 bg-primary text-white rounded-full font-semibold text-base hover:bg-orange-600 transition-colors mt-auto mb-4"
       >
-        Book a Ride
-      </button>
-
-      <button
-        onClick={() => onRoleSelect('driver')}
-        className="w-full py-3 mb-3 bg-secondary text-white rounded-lg font-semibold text-sm hover:bg-gray-800 transition-colors"
-      >
-        Become a Driver
-      </button>
-
-      <button
-        onClick={() => onRoleSelect('admin')}
-        className="w-full py-3 bg-gray-300 text-secondary rounded-lg font-semibold text-sm hover:bg-gray-400 transition-colors"
-      >
-        Admin Access
+        Agree and Continue
       </button>
     </div>
   )
 }
 
-function PhoneInput({ phone, setPhone, onSubmit, onBack, error, loading }) {
+function PhoneInput({ phone, setPhone, onSubmit, error, loading }) {
   return (
     <div className="w-full max-w-sm">
-      <button
-        onClick={onBack}
-        className="text-gray-600 text-sm font-semibold mb-6 hover:text-gray-800"
-      >
-        ← Back
-      </button>
-
       {/* Logo */}
-      <div className="mb-6 text-center">
+      <div className="mb-8 text-center">
         <svg
-          className="w-14 h-14 mx-auto mb-1"
+          className="w-14 h-14 mx-auto mb-2"
           viewBox="0 0 100 100"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -186,33 +155,30 @@ function PhoneInput({ phone, setPhone, onSubmit, onBack, error, loading }) {
           <circle cx="40" cy="50" r="4" fill="#2D2D2D" />
           <circle cx="60" cy="50" r="4" fill="#2D2D2D" />
         </svg>
-        <h2 className="text-2xl font-bold text-secondary">goKab</h2>
-        <p className="text-gray-500 text-xs mt-0.5">Travel in Smart Style</p>
+        <h2 className="text-2xl font-bold text-secondary mt-2">goKab</h2>
+        <p className="text-gray-500 text-xs mt-1">Travel in Smart Style</p>
       </div>
 
-      <h3 className="text-lg font-bold text-secondary mb-1">Enter Mobile Number</h3>
-      <p className="text-gray-600 text-sm mb-6">Enter your mobile number to get started with GoKab. We'll send a verification code to this number.</p>
+      <h3 className="text-lg font-bold text-secondary mb-2 text-center">Enter Mobile Number</h3>
+      <p className="text-gray-600 text-sm mb-6 text-center">Enter your mobile number to get started with GoKab. We'll send a verification code to this number.</p>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-3 mb-4 rounded-lg text-sm">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-3 mb-4 rounded text-sm">
           {error}
         </div>
       )}
 
       {/* Country code and input */}
-      <div className="mb-4">
-        <label className="text-gray-700 text-xs font-semibold mb-2 block">Phone Number</label>
-        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-          <div className="px-3 py-2.5 bg-gray-50 border-r border-gray-300 flex items-center">
-            <span className="text-lg mr-2">🇿🇼</span>
-            <span className="text-gray-700 font-semibold text-sm">+263</span>
-          </div>
+      <div className="mb-6">
+        <div className="flex items-center border-b border-gray-300 pb-3">
+          <span className="text-lg mr-3">🇿🇼</span>
+          <span className="text-gray-700 font-semibold text-sm mr-2">+263</span>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="77 123 4567"
-            className="flex-1 px-3 py-2.5 focus:outline-none text-sm font-semibold text-gray-800"
+            className="flex-1 focus:outline-none text-sm font-semibold text-gray-800 bg-transparent"
           />
         </div>
       </div>
@@ -220,7 +186,7 @@ function PhoneInput({ phone, setPhone, onSubmit, onBack, error, loading }) {
       <button
         onClick={onSubmit}
         disabled={loading}
-        className="w-full py-3 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-orange-600 disabled:opacity-60 transition-colors mt-2"
+        className="w-full py-4 bg-primary text-white rounded-full font-semibold text-base hover:bg-orange-600 disabled:opacity-60 transition-colors"
       >
         {loading ? 'Processing...' : 'Continue'}
       </button>
@@ -232,7 +198,7 @@ function PhoneInput({ phone, setPhone, onSubmit, onBack, error, loading }) {
   )
 }
 
-function VerifyCode({ phone, onVerify, onBack, error, loading }) {
+function VerifyCode({ phone, onVerify, error, loading }) {
   const [code, setCode] = useState('')
 
   const handleCodeChange = (value) => {
@@ -245,17 +211,10 @@ function VerifyCode({ phone, onVerify, onBack, error, loading }) {
 
   return (
     <div className="w-full max-w-sm">
-      <button
-        onClick={onBack}
-        className="text-gray-600 text-sm font-semibold mb-6 hover:text-gray-800"
-      >
-        ← Back
-      </button>
-
       {/* Logo */}
-      <div className="mb-6 text-center">
+      <div className="mb-8 text-center">
         <svg
-          className="w-14 h-14 mx-auto mb-1"
+          className="w-14 h-14 mx-auto mb-2"
           viewBox="0 0 100 100"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -268,35 +227,34 @@ function VerifyCode({ phone, onVerify, onBack, error, loading }) {
         </svg>
       </div>
 
-      <h3 className="text-lg font-bold text-secondary mb-1">Verify Your Number</h3>
-      <p className="text-gray-600 text-sm mb-6">We've sent a verification code to {phone}. Enter it below to continue.</p>
+      <h3 className="text-lg font-bold text-secondary mb-2 text-center">Verify Your Number</h3>
+      <p className="text-gray-600 text-sm mb-6 text-center">We've sent a verification code to {phone}. Enter it below to continue.</p>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-3 mb-4 rounded-lg text-sm">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-3 mb-4 rounded text-sm">
           {error}
         </div>
       )}
 
-      <div className="mb-4">
-        <label className="text-gray-700 text-xs font-semibold mb-2 block">Verification Code</label>
+      <div className="mb-6">
         <input
           type="text"
           value={code}
           onChange={(e) => handleCodeChange(e.target.value)}
           placeholder="000000"
           maxLength="6"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary text-center text-2xl font-bold tracking-wider text-gray-800"
+          className="w-full px-4 py-3 border-b border-gray-300 focus:outline-none focus:border-primary text-center text-2xl font-bold tracking-wider text-gray-800 bg-transparent"
         />
       </div>
 
-      <p className="text-gray-500 text-xs text-center mb-4">
+      <p className="text-gray-500 text-xs text-center mb-6">
         Code automatically verified when complete
       </p>
 
       <button
         onClick={() => onVerify(code)}
         disabled={loading || code.length !== 6}
-        className="w-full py-3 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-orange-600 disabled:opacity-60 transition-colors"
+        className="w-full py-4 bg-primary text-white rounded-full font-semibold text-base hover:bg-orange-600 disabled:opacity-60 transition-colors"
       >
         {loading ? 'Verifying...' : 'Verify'}
       </button>
