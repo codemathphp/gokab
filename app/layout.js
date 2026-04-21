@@ -13,7 +13,10 @@ export const metadata = {
   },
   manifest: '/manifest.json',
   icons: {
-    icon: '/app_icon.png',
+    icon: [
+      { url: '/app_icon.png' },
+      { url: '/app_icon.png', sizes: '192x192', type: 'image/png' },
+    ],
     apple: '/app_icon.png',
   },
 }

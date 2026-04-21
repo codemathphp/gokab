@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { generateVerificationCode, formatPhone } from '@/lib/utils'
 import { createUser, getUser } from '@/lib/firebaseServices'
+import { COUNTRIES } from '@/lib/countries'
 
 export default function Welcome() {
   const router = useRouter()
   const { setUser } = useAuthStore()
   const [step, setStep] = useState('terms') // terms, phone, verify
   const [phone, setPhone] = useState('')
+  const [country, setCountry] = useState(COUNTRIES[1]) // Default to Zimbabwe
   const [verificationCode, setVerificationCode] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -28,7 +30,7 @@ export default function Welcome() {
 
     setLoading(true)
     try {
-      const formattedPhone = formatPhone(phone)
+      const formattedPhone = formatPhone(phone, country.phone)
       
       // Generate verification code
       const code = generateVerificationCode()
@@ -55,15 +57,22 @@ export default function Welcome() {
     setLoading(true)
     try {
       const defaultRole = 'rider'
+      console.log('Creating user with phone:', phone)
       await createUser(phone, defaultRole)
+      console.log('User created successfully')
+      
       const userData = { phone, role: defaultRole }
       setUser(userData)
       localStorage.setItem('gokab_session', JSON.stringify(userData))
       
-      router.push('/rider/home')
+      console.log('Redirecting to /rider/home')
+      await router.push('/rider/home')
+      console.log('Redirect completed')
     } catch (err) {
-      setError('Error creating account')
-      console.error(err)
+      console.error('Full error:', err)
+      console.error('Error code:', err.code)
+      console.error('Error message:', err.message)
+      setError(`Error: ${err.message || 'Failed to create account. Please try again.'}`)
     } finally {
       setLoading(false)
     }
@@ -79,6 +88,8 @@ export default function Welcome() {
         <PhoneInput
           phone={phone}
           setPhone={setPhone}
+          country={country}
+          setCountry={setCountry}
           onSubmit={handlePhoneSubmit}
           error={error}
           loading={loading}
@@ -132,7 +143,9 @@ function TermsScreen({ onAccept }) {
   )
 }
 
-function PhoneInput({ phone, setPhone, onSubmit, error, loading }) {
+function PhoneInput({ phone, setPhone, country, setCountry, onSubmit, error, loading }) {
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false)
+
   return (
     <div className="w-full max-w-sm">
       {/* Logo */}
@@ -150,16 +163,55 @@ function PhoneInput({ phone, setPhone, onSubmit, error, loading }) {
         </div>
       )}
 
-      {/* Country code and input */}
+      {/* Country selector dropdown */}
+      <div className="mb-6 relative">
+        <label className="block text-gray-700 font-semibold mb-2 text-sm">Select Country</label>
+        <button
+          type="button"
+          onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg flex items-center justify-between bg-white hover:border-primary transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{country.flag}</span>
+            <span className="text-gray-700 font-semibold">{country.name}</span>
+            <span className="text-gray-600 text-sm">({country.phone})</span>
+          </div>
+          <span className="text-gray-600">▼</span>
+        </button>
+
+        {/* Dropdown menu */}
+        {showCountryDropdown && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+            {COUNTRIES.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => {
+                  setCountry(c)
+                  setShowCountryDropdown(false)
+                }}
+                className="w-full px-4 py-3 text-left hover:bg-gray-100 flex items-center gap-2 transition-colors border-b border-gray-100 last:border-b-0"
+              >
+                <span className="text-lg">{c.flag}</span>
+                <span className="text-gray-700 font-semibold">{c.name}</span>
+                <span className="text-gray-600 text-sm ml-auto">({c.phone})</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Phone number input */}
       <div className="mb-6">
-        <div className="flex items-center border-b border-gray-300 pb-3">
-          <span className="text-lg mr-3">🇿🇼</span>
-          <span className="text-gray-700 font-semibold text-sm mr-2">+263</span>
+        <label className="block text-gray-700 font-semibold mb-2 text-sm">Phone Number</label>
+        <div className="flex items-center border-2 border-gray-300 rounded-lg px-4 py-3 focus-within:border-primary transition-colors">
+          <span className="text-lg mr-3">{country.flag}</span>
+          <span className="text-gray-700 font-semibold text-sm mr-2">{country.phone}</span>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="77 123 4567"
+            placeholder={country.placeholder}
             className="flex-1 focus:outline-none text-sm font-semibold text-gray-800 bg-transparent"
           />
         </div>
