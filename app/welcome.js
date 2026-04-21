@@ -45,24 +45,27 @@ export default function Welcome() {
 
   const handleCodeVerify = async (enteredCode) => {
     setError('')
-    if (enteredCode === verificationCode) {
-      setLoading(true)
-      try {
-        const defaultRole = 'rider'
-        await createUser(phone, defaultRole)
-        const userData = { phone, role: defaultRole }
-        setUser(userData)
-        localStorage.setItem('gokab_session', JSON.stringify(userData))
-        
-        router.push('/rider/home')
-      } catch (err) {
-        setError('Error creating account')
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    } else {
-      setError('Invalid code. Please try again.')
+    
+    // Validate the entered code matches the generated code
+    if (enteredCode !== verificationCode) {
+      setError('Incorrect verification code. Please try again.')
+      return
+    }
+    
+    setLoading(true)
+    try {
+      const defaultRole = 'rider'
+      await createUser(phone, defaultRole)
+      const userData = { phone, role: defaultRole }
+      setUser(userData)
+      localStorage.setItem('gokab_session', JSON.stringify(userData))
+      
+      router.push('/rider/home')
+    } catch (err) {
+      setError('Error creating account')
+      console.error(err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -85,6 +88,7 @@ export default function Welcome() {
       {step === 'verify' && (
         <VerifyCode
           phone={phone}
+          verificationCode={verificationCode}
           onVerify={handleCodeVerify}
           error={error}
           loading={loading}
@@ -99,27 +103,17 @@ function TermsScreen({ onAccept }) {
     <div className="w-full max-w-sm flex flex-col">
       {/* Logo */}
       <div className="mb-8 text-center">
-        <svg
-          className="w-16 h-16 mx-auto mb-2"
-          viewBox="0 0 100 100"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="50" cy="30" r="8" fill="#FF7A3D" />
-          <circle cx="50" cy="30" r="12" fill="none" stroke="#FF7A3D" strokeWidth="1" />
-          <path d="M30 50 L70 50 M30 60 L70 60" stroke="#2D2D2D" strokeWidth="3" strokeLinecap="round" />
-          <circle cx="40" cy="50" r="4" fill="#2D2D2D" />
-          <circle cx="60" cy="50" r="4" fill="#2D2D2D" />
-        </svg>
-        <h1 className="text-3xl font-bold text-secondary mt-2">goKab</h1>
-        <p className="text-gray-500 text-xs mt-1">Travel in Smart Style</p>
+        <img
+          src="/main_logo.png"
+          alt="goKab"
+          className="w-32 h-20 mx-auto mb-2 object-contain"
+        />
       </div>
 
       {/* Placeholder area */}
       <div className="w-full h-48 bg-gray-200 rounded-lg mb-8"></div>
 
       {/* Content */}
-      <h2 className="text-2xl font-bold text-secondary mb-4 text-center">Welcome To GoKab</h2>
       
       <p className="text-gray-700 text-sm text-center mb-6">
         Please <span className="text-primary font-semibold">Read</span> through our{' '}
@@ -143,24 +137,12 @@ function PhoneInput({ phone, setPhone, onSubmit, error, loading }) {
     <div className="w-full max-w-sm">
       {/* Logo */}
       <div className="mb-8 text-center">
-        <svg
-          className="w-14 h-14 mx-auto mb-2"
-          viewBox="0 0 100 100"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="50" cy="30" r="8" fill="#FF7A3D" />
-          <circle cx="50" cy="30" r="12" fill="none" stroke="#FF7A3D" strokeWidth="1" />
-          <path d="M30 50 L70 50 M30 60 L70 60" stroke="#2D2D2D" strokeWidth="3" strokeLinecap="round" />
-          <circle cx="40" cy="50" r="4" fill="#2D2D2D" />
-          <circle cx="60" cy="50" r="4" fill="#2D2D2D" />
-        </svg>
-        <h2 className="text-2xl font-bold text-secondary mt-2">goKab</h2>
-        <p className="text-gray-500 text-xs mt-1">Travel in Smart Style</p>
+        <img
+          src="/main_logo.png"
+          alt="goKab"
+          className="w-32 h-20 mx-auto mb-2 object-contain"
+        />
       </div>
-
-      <h3 className="text-lg font-bold text-secondary mb-2 text-center">Enter Mobile Number</h3>
-      <p className="text-gray-600 text-sm mb-6 text-center">Enter your mobile number to get started with GoKab. We'll send a verification code to this number.</p>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 p-3 mb-4 rounded text-sm">
@@ -192,49 +174,49 @@ function PhoneInput({ phone, setPhone, onSubmit, error, loading }) {
       </button>
 
       <p className="text-gray-500 text-xs text-center mt-4">
-        Your number is safe with us · Standard SMS rates may apply
+        Your number is safe with us
       </p>
     </div>
   )
 }
 
-function VerifyCode({ phone, onVerify, error, loading }) {
+function VerifyCode({ phone, verificationCode, onVerify, error, loading }) {
   const [code, setCode] = useState('')
 
   const handleCodeChange = (value) => {
     const numericValue = value.replace(/\D/g, '')
     setCode(numericValue)
-    if (numericValue.length === 6) {
-      onVerify(numericValue)
-    }
+  }
+
+  const handleVerify = () => {
+    onVerify(code)
   }
 
   return (
     <div className="w-full max-w-sm">
       {/* Logo */}
       <div className="mb-8 text-center">
-        <svg
-          className="w-14 h-14 mx-auto mb-2"
-          viewBox="0 0 100 100"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="50" cy="30" r="8" fill="#FF7A3D" />
-          <circle cx="50" cy="30" r="12" fill="none" stroke="#FF7A3D" strokeWidth="1" />
-          <path d="M30 50 L70 50 M30 60 L70 60" stroke="#2D2D2D" strokeWidth="3" strokeLinecap="round" />
-          <circle cx="40" cy="50" r="4" fill="#2D2D2D" />
-          <circle cx="60" cy="50" r="4" fill="#2D2D2D" />
-        </svg>
+        <img
+          src="/main_logo.png"
+          alt="goKab"
+          className="w-32 h-20 mx-auto object-contain"
+        />
       </div>
 
-      <h3 className="text-lg font-bold text-secondary mb-2 text-center">Verify Your Number</h3>
-      <p className="text-gray-600 text-sm mb-6 text-center">We've sent a verification code to {phone}. Enter it below to continue.</p>
+      <h3 className="text-lg font-bold text-secondary mb-2 text-center">Activate Your Account</h3>
+      <p className="text-gray-600 text-sm mb-6 text-center">Enter the verification code to activate your account</p>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 p-3 mb-4 rounded text-sm">
           {error}
         </div>
       )}
+
+      {/* Display the verification code */}
+      <div className="bg-gray-100 p-4 rounded-lg mb-6 text-center">
+        <p className="text-gray-600 text-xs mb-2">Your Verification Code</p>
+        <p className="text-3xl font-bold text-primary tracking-wider">{verificationCode}</p>
+      </div>
 
       <div className="mb-6">
         <input
@@ -248,15 +230,15 @@ function VerifyCode({ phone, onVerify, error, loading }) {
       </div>
 
       <p className="text-gray-500 text-xs text-center mb-6">
-        Code automatically verified when complete
+        Enter the 6-digit code above to verify
       </p>
 
       <button
-        onClick={() => onVerify(code)}
+        onClick={handleVerify}
         disabled={loading || code.length !== 6}
         className="w-full py-4 bg-primary text-white rounded-full font-semibold text-base hover:bg-orange-600 disabled:opacity-60 transition-colors"
       >
-        {loading ? 'Verifying...' : 'Verify'}
+        {loading ? 'Activating...' : 'Activate Account'}
       </button>
     </div>
   )
