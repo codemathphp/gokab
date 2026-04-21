@@ -116,6 +116,12 @@ export default function DriverDashboard() {
 
       {/* Bottom Actions */}
       <div className="px-4 py-6 space-y-3">
+        <button 
+          onClick={() => router.push('/driver/settings')}
+          className="w-full py-3 bg-blue-100 text-blue-700 rounded-xl font-semibold hover:bg-blue-200 transition"
+        >
+          💰 Pricing Settings
+        </button>
         <button className="w-full py-3 bg-gray-100 text-secondary rounded-xl font-semibold hover:bg-gray-200 transition">
           📊 View History
         </button>

@@ -51,8 +51,21 @@ export default function RiderHome() {
       alert('Please enter a destination')
       return
     }
-    // Navigate to searching page
-    router.push('/rider/searching')
+    // Save ride context before navigating
+    const rideContext = {
+      pickup: {
+        lat: location.lat,
+        lng: location.lng,
+        address: currentAddress,
+      },
+      destination: {
+        address: destination,
+      },
+    }
+    localStorage.setItem('gokab_ride_context', JSON.stringify(rideContext))
+    
+    // Navigate to search results to see available drivers
+    router.push('/rider/search-results')
   }
 
   const handleSelectRecentLocation = (loc) => {

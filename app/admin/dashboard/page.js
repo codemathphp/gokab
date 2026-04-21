@@ -116,6 +116,12 @@ export default function AdminDashboard() {
         >
           🚗 Rides
         </button>
+        <button
+          onClick={() => router.push('/admin/pricing')}
+          className="px-6 py-2 rounded-lg font-semibold transition-colors bg-green-100 text-green-700 hover:bg-green-200"
+        >
+          💰 Pricing
+        </button>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 pb-8">
