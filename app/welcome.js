@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
-import { generateVerificationCode, formatPhoneNumber } from '@/lib/utils'
+import { generateVerificationCode, formatPhone } from '@/lib/utils'
 import { createUser, getUser } from '@/lib/firebaseServices'
 import Link from 'next/link'
 
@@ -32,7 +32,7 @@ export default function Welcome() {
 
     setLoading(true)
     try {
-      const formattedPhone = formatPhoneNumber(phone)
+      const formattedPhone = formatPhone(phone)
       const existingUser = await getUser(formattedPhone)
 
       if (existingUser && existingUser.role === role) {
