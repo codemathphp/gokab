@@ -1,7 +1,6 @@
-'use client'
-
-// Make this page dynamic (not statically generated)
 export const dynamic = 'force-dynamic'
+
+'use client'
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
