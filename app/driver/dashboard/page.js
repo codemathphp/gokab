@@ -19,8 +19,25 @@ export default function DriverDashboard() {
     // Clear the redirecting flag now that we're successfully loaded
     sessionStorage.removeItem('gokab_redirecting')
 
-    if (!user || user.role !== 'driver') {
-      router.push('/welcome')
+    // Validate session exists and has required fields
+    const session = localStorage.getItem('gokab_session')
+    if (!session) {
+      router.replace('/welcome')
+      return
+    }
+
+    try {
+      const userData = JSON.parse(session)
+      if (!userData.phone || !userData.role || userData.role !== 'driver') {
+        // Invalid session - clear and redirect
+        localStorage.removeItem('gokab_session')
+        router.replace('/welcome')
+        return
+      }
+    } catch (err) {
+      localStorage.removeItem('gokab_session')
+      router.replace('/welcome')
+      return
     }
 
     // Get driver's location
@@ -35,7 +52,7 @@ export default function DriverDashboard() {
         (error) => console.error('Geolocation error:', error)
       )
     }
-  }, [user, router])
+  }, [router])
 
   const toggleOnlineStatus = () => {
     const newStatus = driverStatus === 'online' ? 'offline' : 'online'

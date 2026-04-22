@@ -40,8 +40,24 @@ export default function RiderHome() {
     // Clear the redirecting flag now that we're successfully loaded
     sessionStorage.removeItem('gokab_redirecting')
 
-    if (!user || user.role !== 'rider') {
-      router.push('/welcome')
+    // Validate session exists and has required fields
+    const session = localStorage.getItem('gokab_session')
+    if (!session) {
+      router.replace('/welcome')
+      return
+    }
+
+    try {
+      const userData = JSON.parse(session)
+      if (!userData.phone || !userData.role || userData.role !== 'rider') {
+        // Invalid session - clear and redirect
+        localStorage.removeItem('gokab_session')
+        router.replace('/welcome')
+        return
+      }
+    } catch (err) {
+      localStorage.removeItem('gokab_session')
+      router.replace('/welcome')
       return
     }
 

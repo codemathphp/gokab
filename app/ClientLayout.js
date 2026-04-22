@@ -1,21 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function ClientLayout({ children }) {
   const [mounted, setMounted] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
-    // Initialize default admin account on app startup
-    fetch('/api/admin/init', { method: 'POST' })
-      .catch((err) => {
-        console.warn('Could not initialize default admin:', err)
-      })
-
-    // Just mount - don't update Zustand here to avoid state loop
-    // Each component will read from localStorage as needed
+    // Just mount - don't do any async operations that could block rendering
     setMounted(true)
 
     // Register service worker for PWA
