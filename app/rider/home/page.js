@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
 import { useEffect, useState } from 'react'
 import MapComponent from '@/components/MapComponent'
 import SideDrawer from '@/components/SideDrawer'
@@ -11,7 +10,7 @@ import { getCurrentLocation, reverseGeocode, getRecentLocations, saveRecentLocat
 
 export default function RiderHome() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const [user, setUser] = useState(null)
   const [location, setLocation] = useState(null)
   const [currentAddress, setCurrentAddress] = useState('Loading location...')
   const [destination, setDestination] = useState('')
@@ -22,9 +21,30 @@ export default function RiderHome() {
   const [editingLocation, setEditingLocation] = useState(false)
 
   const services = [
-    { id: 'gokab', name: 'GoKab', icon: '🚗', color: 'orange', description: '2:4' },
-    { id: 'comfort', name: 'Go Comfort', icon: '🚙', color: 'gray', description: 'Premium' },
+    { id: 'gokab', name: 'GoKab', icon: 'car', color: 'orange', description: '2:4' },
+    { id: 'comfort', name: 'Go Comfort', icon: 'suv', color: 'gray', description: 'Premium' },
   ]
+
+  useEffect(() => {
+    // Get user from localStorage
+    const session = localStorage.getItem('gokab_session')
+    if (!session) {
+      router.replace('/welcome')
+      return
+    }
+    try {
+      const userData = JSON.parse(session)
+      if (!userData.phone || !userData.role || userData.role !== 'rider') {
+        localStorage.removeItem('gokab_session')
+        router.replace('/welcome')
+        return
+      }
+      setUser(userData)
+    } catch (err) {
+      localStorage.removeItem('gokab_session')
+      router.replace('/welcome')
+    }
+  }, [router])
 
   useEffect(() => {
     if (!user || user.role !== 'rider') {

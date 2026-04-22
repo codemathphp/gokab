@@ -1,14 +1,21 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
+
 import { useEffect, useState } from 'react'
 import { DEFAULT_PRICE_PER_KM } from '@/lib/pricing'
 import { FiClipboard, FiCheck, FiAlertCircle } from 'react-icons/fi'
 
 export default function AdminPricing() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const session = localStorage.getItem('gokab_session')
+    if (session) {
+      setUser(JSON.parse(session))
+    }
+  }, [])
   const [minPrice, setMinPrice] = useState(0.50)
   const [maxPrice, setMaxPrice] = useState(3.00)
   const [defaultPrice, setDefaultPrice] = useState(DEFAULT_PRICE_PER_KM)

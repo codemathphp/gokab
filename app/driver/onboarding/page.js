@@ -2,12 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
+
 import { createDriverApplication } from '@/lib/firebaseServices'
 
 export default function DriverOnboarding() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const session = localStorage.getItem('gokab_session')
+    if (session) {
+      setUser(JSON.parse(session))
+    }
+  }, [])
   const [step, setStep] = useState('vehicle')
   const [loading, setLoading] = useState(false)
   const [vehicleData, setVehicleData] = useState({

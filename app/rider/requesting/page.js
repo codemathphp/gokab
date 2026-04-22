@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore, useRideStore } from '@/lib/store'
+import { useRideStore } from '@/lib/store'
 import { useEffect, useState } from 'react'
 import MapComponent from '@/components/MapComponent'
 import { FiPhone, FiX } from 'react-icons/fi'

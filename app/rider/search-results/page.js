@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore, useRideStore } from '@/lib/store'
+import { useRideStore } from '@/lib/store'
 import { useEffect, useState } from 'react'
 import MapComponent from '@/components/MapComponent'
 import { 

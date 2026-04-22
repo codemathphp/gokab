@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthStore, useRideStore } from '@/lib/store'
+import { useRideStore } from '@/lib/store'
 import MapComponent from '@/components/MapComponent'
 
 export default function RiderSearching() {

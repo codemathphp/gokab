@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
+
 import { useEffect, useState } from 'react'
 import { PRICING_RANGE, DEFAULT_PRICE_PER_KM, formatPrice, isValidPrice } from '@/lib/pricing'
 import { FiLightbulb, FiCheck } from 'react-icons/fi'

@@ -1,13 +1,20 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
+
 import { useEffect } from 'react'
 import { FiClock } from 'react-icons/fi'
 
 export default function WaitingApproval() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const session = localStorage.getItem('gokab_session')
+    if (session) {
+      setUser(JSON.parse(session))
+    }
+  }, [])
 
   useEffect(() => {
     if (!user || user.role !== 'driver') {

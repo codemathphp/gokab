@@ -1,12 +1,20 @@
+export const dynamic = 'force-dynamic'
+
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function NotFound() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const session = localStorage.getItem('gokab_session')
+    if (session) {
+      setUser(JSON.parse(session))
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary to-orange-500 flex items-center justify-center px-4">
