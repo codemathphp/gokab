@@ -16,6 +16,7 @@ export default function Welcome() {
   const [enteredCode, setEnteredCode] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   // Check if user already has a valid session on mount
   useEffect(() => {
@@ -24,13 +25,23 @@ export default function Welcome() {
       try {
         const userData = JSON.parse(session)
         console.log('User already has session, redirecting to home')
+        setIsRedirecting(true)
         const redirectPath = userData.role === 'driver' ? '/driver/dashboard' : '/rider/home'
         router.replace(redirectPath)
       } catch (err) {
         console.error('Failed to parse session:', err)
       }
     }
-  }, [])
+  }, [router])
+
+  // Don't render form if redirecting
+  if (isRedirecting) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin">Redirecting...</div>
+      </div>
+    )
+  }
 
   const handleTermsAccept = () => {
     setStep('phone')
