@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { generateVerificationCode, formatPhone } from '@/lib/utils'
 import { createUser, getUser } from '@/lib/firebaseServices'
 import { COUNTRIES } from '@/lib/countries'
-import { useAuthStore } from '@/lib/store'
 
 export default function Welcome() {
   const router = useRouter()
@@ -76,9 +75,6 @@ export default function Welcome() {
               deviceId: deviceId,
             },
           ]))
-          
-          // Update Zustand store
-          useAuthStore.setState({ user: userData, sessionPersisted: true })
           
           console.log('Account found - logging in directly')
           const redirectPath = existingUser.role === 'driver' ? '/driver/dashboard' : '/rider/home'
@@ -151,9 +147,6 @@ export default function Welcome() {
           deviceId,
         },
       ]))
-      
-      // Update Zustand store
-      useAuthStore.setState({ user: userData, sessionPersisted: true })
       
       console.log('User verified and session created')
       console.log('Redirecting to /rider/home')

@@ -2,33 +2,31 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
 import Link from 'next/link'
-import { useLocalSession } from '@/lib/store'
 
 export default function Home() {
   const router = useRouter()
-  const { user, loading } = useAuthStore()
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!loading) {
-        if (user) {
-          if (user.role === 'driver') {
-            router.push('/driver/dashboard')
-          } else if (user.role === 'admin') {
-            router.push('/admin/dashboard')
-          } else {
-            router.push('/rider/home')
-          }
+    // Check localStorage for session without using Zustand hook
+    const session = localStorage.getItem('gokab_session')
+    if (session) {
+      try {
+        const userData = JSON.parse(session)
+        if (userData.role === 'driver') {
+          router.replace('/driver/dashboard')
+        } else if (userData.role === 'admin') {
+          router.replace('/admin/dashboard')
         } else {
-          router.push('/welcome')
+          router.replace('/rider/home')
         }
+      } catch (err) {
+        router.replace('/welcome')
       }
-    }, 2000)
-
-    return () => clearTimeout(timer)
-  }, [user, loading, router])
+    } else {
+      router.replace('/welcome')
+    }
+  }, [router])
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
