@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
 import { useEffect, useState } from 'react'
 import TopBar from '@/components/TopBar'
 import SideDrawer from '@/components/SideDrawer'
@@ -9,19 +8,34 @@ import { FiArrowLeft, FiUser, FiCreditCard, FiNavigation, FiHelpCircle, FiSettin
 
 export default function RiderProfile() {
   const router = useRouter()
-  const { user, logout } = useAuthStore()
+  const [user, setUser] = useState(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
-    if (!user || user.role !== 'rider') {
-      router.push('/welcome')
+    // Get user from localStorage
+    const session = localStorage.getItem('gokab_session')
+    if (!session) {
+      router.replace('/welcome')
+      return
     }
-  }, [user, router])
+
+    try {
+      const userData = JSON.parse(session)
+      if (!userData.phone || !userData.role || userData.role !== 'rider') {
+        localStorage.removeItem('gokab_session')
+        router.replace('/welcome')
+        return
+      }
+      setUser(userData)
+    } catch (err) {
+      localStorage.removeItem('gokab_session')
+      router.replace('/welcome')
+    }
+  }, [router])
 
   const handleLogout = () => {
-    logout()
     localStorage.removeItem('gokab_session')
-    router.push('/welcome')
+    router.replace('/welcome')
   }
 
   return (

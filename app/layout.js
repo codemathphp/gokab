@@ -1,11 +1,17 @@
 import './globals.css'
 import ClientLayout from './ClientLayout'
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  userScalable: false,
+  themeColor: '#FF7A3D',
+}
+
 export const metadata = {
   title: 'GoKab - Travel in Smart Style',
   description: 'Premium taxi service - Travel in Smart Style',
-  viewport: 'width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no',
-  themeColor: '#FF7A3D',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
