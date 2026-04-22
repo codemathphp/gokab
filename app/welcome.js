@@ -2,14 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
 import { generateVerificationCode, formatPhone } from '@/lib/utils'
 import { createUser, getUser } from '@/lib/firebaseServices'
 import { COUNTRIES } from '@/lib/countries'
 
 export default function Welcome() {
   const router = useRouter()
-  const { setUser } = useAuthStore()
   const [step, setStep] = useState('terms') // terms, phone, verify, name
   const [phone, setPhone] = useState('')
   const [name, setName] = useState('')
@@ -45,7 +43,7 @@ export default function Welcome() {
             isVerified: true,
           }
           
-          // Persist to localStorage
+          // Save to localStorage directly
           localStorage.setItem('gokab_session', JSON.stringify(userData))
           const deviceId = localStorage.getItem('gokab_device_id') || ('device_' + Math.random().toString(36).substr(2, 9))
           localStorage.setItem('gokab_device_id', deviceId)
@@ -57,12 +55,9 @@ export default function Welcome() {
             },
           ]))
           
-          // Update Zustand store directly
-          useAuthStore.setState({ user: userData, sessionPersisted: true })
-          
           console.log('Account found - logging in directly')
           const redirectPath = existingUser.role === 'driver' ? '/driver/dashboard' : '/rider/home'
-          setTimeout(() => router.push(redirectPath), 50)
+          router.push(redirectPath)
           return
         }
       } catch (err) {
@@ -119,7 +114,6 @@ export default function Welcome() {
         console.log('User created successfully in Firebase')
       } catch (firebaseErr) {
         console.warn('Firebase creation failed, using localStorage fallback:', firebaseErr.message)
-        // Fallback: still allow login with localStorage only
       }
       
       const userData = { phone, name, role: defaultRole, isVerified: true }
@@ -136,16 +130,11 @@ export default function Welcome() {
         },
       ]))
       
-      // Update Zustand store
-      useAuthStore.setState({ user: userData, sessionPersisted: true })
-      
       console.log('User verified and session created')
       console.log('Redirecting to /rider/home')
       
-      // Use setTimeout to ensure state is committed before navigation
-      setTimeout(() => {
-        router.push('/rider/home')
-      }, 50)
+      // Navigate after a small delay to ensure storage is written
+      router.push('/rider/home')
     } catch (err) {
       console.error('Full error:', err)
       console.error('Error message:', err.message)
