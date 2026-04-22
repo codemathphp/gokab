@@ -33,7 +33,35 @@ export default function Welcome() {
     try {
       const formattedPhone = formatPhone(phone, country.phone)
       
-      // Generate verification code
+      // Check if account already exists
+      try {
+        const existingUser = await getUser(formattedPhone)
+        if (existingUser) {
+          // Account exists - log in directly without verification
+          const userData = {
+            phone: formattedPhone,
+            name: existingUser.name || 'User',
+            role: existingUser.role || 'rider',
+            isVerified: true,
+          }
+          setUser(userData)
+          localStorage.setItem('gokab_session', JSON.stringify(userData))
+          localStorage.setItem('gokab_device_sessions', JSON.stringify([
+            {
+              phone: formattedPhone,
+              lastLogin: new Date().toISOString(),
+              deviceId: localStorage.getItem('gokab_device_id') || 'unknown',
+            },
+          ]))
+          console.log('Account found - logging in directly')
+          await router.push(existingUser.role === 'driver' ? '/driver/dashboard' : '/rider/home')
+          return
+        }
+      } catch (err) {
+        console.log('Firebase check skipped, proceeding with new account')
+      }
+      
+      // New account - generate verification code
       const code = generateVerificationCode()
       setVerificationCode(code)
       setPhone(formattedPhone)
@@ -71,6 +99,12 @@ export default function Welcome() {
       const defaultRole = 'rider'
       console.log('Creating user with phone:', phone, 'and name:', name)
       
+      // Generate device ID if not exists
+      if (!localStorage.getItem('gokab_device_id')) {
+        const deviceId = 'device_' + Math.random().toString(36).substr(2, 9)
+        localStorage.setItem('gokab_device_id', deviceId)
+      }
+      
       // Try to create in Firebase
       try {
         await createUser(phone, defaultRole, name)
@@ -82,7 +116,17 @@ export default function Welcome() {
       
       const userData = { phone, name, role: defaultRole, isVerified: true }
       setUser(userData)
+      
+      // Persist session with device tracking
       localStorage.setItem('gokab_session', JSON.stringify(userData))
+      localStorage.setItem('gokab_session_created', new Date().toISOString())
+      localStorage.setItem('gokab_device_sessions', JSON.stringify([
+        {
+          phone,
+          lastLogin: new Date().toISOString(),
+          deviceId: localStorage.getItem('gokab_device_id'),
+        },
+      ]))
       
       console.log('User verified and session created')
       console.log('Redirecting to /rider/home')

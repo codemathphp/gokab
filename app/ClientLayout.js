@@ -1,11 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useAuthStore } from '@/lib/store'
 
 export default function ClientLayout({ children }) {
-  const { initSession } = useAuthStore()
+  const { initSession, updateLastActivity } = useAuthStore()
   const [mounted, setMounted] = useState(false)
+
+  // Memoize the activity handler to prevent infinite re-renders
+  const handleActivity = useCallback(() => {
+    updateLastActivity()
+  }, [updateLastActivity])
 
   useEffect(() => {
     initSession()
@@ -18,6 +23,21 @@ export default function ClientLayout({ children }) {
       })
     }
   }, [initSession])
+
+  useEffect(() => {
+    // Update last activity on user interaction
+    window.addEventListener('click', handleActivity)
+    window.addEventListener('scroll', handleActivity)
+    window.addEventListener('keydown', handleActivity)
+    window.addEventListener('touchstart', handleActivity)
+
+    return () => {
+      window.removeEventListener('click', handleActivity)
+      window.removeEventListener('scroll', handleActivity)
+      window.removeEventListener('keydown', handleActivity)
+      window.removeEventListener('touchstart', handleActivity)
+    }
+  }, [handleActivity])
 
   if (!mounted) {
     return (
