@@ -395,5 +395,5 @@ function SetupPage({ phone, verificationCode, enteredCode, setEnteredCode, name,
         Both fields are required to continue
       </p>
     </div>
-  }
+  )
 }
