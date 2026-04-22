@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic'
+// Build version: 2024-04-22-v2
 
 'use client'
 
