@@ -74,8 +74,7 @@ export default function DriverDashboard() {
       </div>
 
       <SideDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
-        {location && <MapComponent center={location} />}
-      </div>
+      {location && <MapComponent center={location} />}
 
       {/* Stats */}
       <div className="flex gap-3 px-4 py-4">
