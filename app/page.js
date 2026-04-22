@@ -40,16 +40,6 @@ export default function Home() {
       </div>
 
       <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-
-      {/* Admin Portal Link */}
-      <div className="absolute bottom-6 right-6">
-        <button
-          onClick={() => router.push('/admin/login')}
-          className="text-xs text-gray-400 hover:text-gray-600 underline transition"
-        >
-          Admin Portal
-        </button>
-      </div>
     </div>
   )
 }
