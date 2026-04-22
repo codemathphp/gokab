@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { initializeDefaultAdmin } from '@/lib/firebaseServices'
 
 export default function ClientLayout({ children }) {
   const [mounted, setMounted] = useState(false)
@@ -10,9 +9,10 @@ export default function ClientLayout({ children }) {
 
   useEffect(() => {
     // Initialize default admin account on app startup
-    initializeDefaultAdmin().catch((err) => {
-      console.warn('Could not initialize default admin:', err)
-    })
+    fetch('/api/admin/init', { method: 'POST' })
+      .catch((err) => {
+        console.warn('Could not initialize default admin:', err)
+      })
 
     // Just mount - don't update Zustand here to avoid state loop
     // Each component will read from localStorage as needed
