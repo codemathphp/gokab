@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthStore, useDriverStore } from '@/lib/store'
 import MapComponent from '@/components/MapComponent'
 import SideDrawer from '@/components/SideDrawer'
 import TopBar from '@/components/TopBar'
@@ -10,10 +9,9 @@ import { FiUser } from 'react-icons/fi'
 
 export default function DriverDashboard() {
   const router = useRouter()
-  const { user, logout } = useAuthStore()
-  const { driverStatus, setDriverStatus } = useDriverStore()
   const [location, setLocation] = useState(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [driverStatus, setDriverStatus] = useState('offline')
 
   useEffect(() => {
     // Clear the redirecting flag now that we're successfully loaded
@@ -60,9 +58,8 @@ export default function DriverDashboard() {
   }
 
   const handleLogout = () => {
-    logout()
     localStorage.removeItem('gokab_session')
-    router.push('/welcome')
+    router.replace('/welcome')
   }
 
   return (

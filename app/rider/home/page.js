@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
 import { useEffect, useState } from 'react'
 import MapComponent from '@/components/MapComponent'
 import SideDrawer from '@/components/SideDrawer'
@@ -13,8 +12,22 @@ import { FiMapPin, FiClock, FiDollarSign, FiArrowLeft, FiLoader } from 'react-ic
 
 export default function RiderHome() {
   const router = useRouter()
-  const { user } = useAuthStore()
   const [location, setLocation] = useState(null)
+  const [currentAddress, setCurrentAddress] = useState('Loading location...')
+  const [destination, setDestination] = useState('')
+  const [destinationAddress, setDestinationAddress] = useState('')
+  const [destinationCoords, setDestinationCoords] = useState(null)
+  const [recentLocations, setRecentLocations] = useState([])
+  const [selectedService, setSelectedService] = useState('gokab')
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [editingLocation, setEditingLocation] = useState(false)
+  const [tripInfo, setTripInfo] = useState(null)
+  const [calculatingDistance, setCalculatingDistance] = useState(false)
+  const [nearbyDrivers, setNearbyDrivers] = useState([
+    { id: 1, name: 'Lloyd G.', distance: '2 min away', lat: -17.820, lng: 31.040 },
+    { id: 2, name: 'Munyaradzi', distance: '5 min away', lat: -17.830, lng: 31.025 },
+    { id: 3, name: 'Tonderai', distance: '8 min away', lat: -17.815, lng: 31.045 },
+  ])
   const [currentAddress, setCurrentAddress] = useState('Loading location...')
   const [destination, setDestination] = useState('')
   const [destinationAddress, setDestinationAddress] = useState('')
@@ -97,7 +110,7 @@ export default function RiderHome() {
     return () => {
       delete window.onTripInfoUpdate
     }
-  }, [user, router])
+  }, [router])
 
   const handleRequestRide = () => {
     if (!destination) {
@@ -165,7 +178,7 @@ export default function RiderHome() {
     setEditingLocation(false)
   }
 
-  if (!user || !location) return (
+  if (!location) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center">
         <div className="text-4xl mb-4">
