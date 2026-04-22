@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -14,46 +14,54 @@ export default function MapComponent({
   const mapContainer = useRef(null)
   const map = useRef(null)
   const markers = useRef([])
+  const [mapError, setMapError] = useState(false)
 
   useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_MAPBOX_TOKEN) {
-      console.warn('Mapbox token not configured')
-      return
-    }
+    try {
+      if (!process.env.NEXT_PUBLIC_MAPBOX_TOKEN) {
+        console.warn('Mapbox token not configured - showing placeholder map')
+        setMapError(true)
+        return
+      }
 
-    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+      mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
-    if (map.current) return
+      if (map.current || !mapContainer.current) return
 
-    // Initialize map
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [center.lng, center.lat],
-      zoom: 14,
-    })
+      // Initialize map
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [center.lng, center.lat],
+        zoom: 14,
+      })
 
-    // Add current location marker (blue dot)
-    const currentMarker = document.createElement('div')
-    currentMarker.className = 'w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg'
-    new mapboxgl.Marker(currentMarker)
-      .setLngLat([center.lng, center.lat])
-      .addTo(map.current)
+      // Add current location marker (blue dot)
+      const currentMarker = document.createElement('div')
+      currentMarker.className = 'w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg'
+      new mapboxgl.Marker(currentMarker)
+        .setLngLat([center.lng, center.lat])
+        .addTo(map.current)
 
-    // Draw route if pickup and destination exist
-    if (pickup && destination && map.current.isStyleLoaded()) {
-      drawRoute()
-    }
+      // Draw route if pickup and destination exist
+      if (pickup && destination && map.current.isStyleLoaded()) {
+        drawRoute()
+      }
 
-    // Add nearby driver markers
-    if (drivers && drivers.length > 0) {
-      addDriverMarkers()
-    }
+      // Add nearby driver markers
+      if (drivers && drivers.length > 0) {
+        addDriverMarkers()
+      }
 
-    return () => {
-      // Cleanup markers
-      markers.current.forEach(marker => marker.remove())
-      markers.current = []
+      return () => {
+        // Cleanup markers
+        markers.current.forEach(marker => marker.remove())
+        markers.current = []
+      }
+    } catch (err) {
+      console.error('Error initializing map:', err)
+      setMapError(true)
+      return () => {}
     }
   }, [center])
 
@@ -188,9 +196,18 @@ export default function MapComponent({
   return (
     <div
       ref={mapContainer}
-      className="w-full h-full relative"
+      className="w-full h-full relative bg-gray-100"
       style={{ minHeight: '100%' }}
-    />
+    >
+      {mapError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
+          <div className="text-center">
+            <p className="text-gray-600 text-sm">Map not available</p>
+            <p className="text-gray-500 text-xs mt-2">{center.lat.toFixed(4)}, {center.lng.toFixed(4)}</p>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
