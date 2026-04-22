@@ -126,12 +126,6 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleLogout = () => {
-    logout()
-    localStorage.removeItem('gokab_session')
-    router.push('/welcome')
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
