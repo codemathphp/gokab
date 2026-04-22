@@ -58,11 +58,18 @@ export default function RiderHome() {
 
     // Get current location and reverse geocode it
     const initializeLocation = async () => {
+      // Set default location immediately so page renders
+      const defaultLocation = { lat: -17.825, lng: 31.033, accuracy: null }
+      setLocation(defaultLocation)
+      setCurrentAddress('Harare')
+      setRecentLocations(getRecentLocations())
+
+      // Try to get real location in background (non-blocking)
       try {
         const currentLoc = await getCurrentLocation()
         setLocation(currentLoc)
         
-        // Reverse geocode to get address (won't block if fails)
+        // Reverse geocode to get address (won't block)
         try {
           const address = await reverseGeocode(currentLoc.lat, currentLoc.lng)
           setCurrentAddress(address)
@@ -70,15 +77,9 @@ export default function RiderHome() {
           // Use coordinates as fallback
           setCurrentAddress(`${currentLoc.lat.toFixed(4)}, ${currentLoc.lng.toFixed(4)}`)
         }
-        
-        // Load recent locations
-        setRecentLocations(getRecentLocations())
       } catch (locErr) {
-        console.error('Failed to initialize location:', locErr)
-        // Set default location if geolocation fails
-        setLocation({ lat: -17.825, lng: 31.033, accuracy: null })
-        setCurrentAddress('Harare')
-        setRecentLocations(getRecentLocations())
+        console.warn('Could not get precise location:', locErr.message)
+        // Keep default location already set
       }
     }
 
@@ -161,12 +162,22 @@ export default function RiderHome() {
   }
 
   if (!location) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-4xl mb-4">
-          <FiMapPin className="inline-block" />
+    <div className="min-h-screen bg-gray-50 flex flex-col relative">
+      {/* Show loading skeleton while location loads */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-gray-200 to-gray-100 animate-pulse" />
+      
+      {/* Quick top bar */}
+      <div className="relative z-10 bg-white border-b">
+        <div className="p-4 max-w-md mx-auto flex justify-between items-center">
+          <div className="h-6 bg-gray-300 rounded w-24 animate-pulse" />
+          <div className="h-6 w-6 bg-gray-300 rounded animate-pulse" />
         </div>
-        <p className="text-gray-600">Getting your location...</p>
+      </div>
+      
+      {/* Skeleton content */}
+      <div className="relative z-10 flex-1 p-4 max-w-md mx-auto w-full">
+        <div className="h-12 bg-gray-300 rounded-lg mb-4 animate-pulse" />
+        <div className="h-20 bg-gray-300 rounded-lg animate-pulse" />
       </div>
     </div>
   )

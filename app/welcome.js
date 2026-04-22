@@ -24,36 +24,39 @@ export default function Welcome() {
     // Only check once per component mount
     if (sessionChecked) return
 
-    const session = localStorage.getItem('gokab_session')
-    if (session) {
-      try {
-        const userData = JSON.parse(session)
-        
-        // Validate session has required fields
-        if (userData.phone && userData.role) {
-          // Valid session - redirect immediately and don't render anything
-          setIsRedirecting(true)
-          const redirectPath = userData.role === 'driver' ? '/driver/dashboard' : '/rider/home'
-          // Replace, don't push, to prevent back button returning to welcome
-          router.replace(redirectPath)
-          return
+    // Do session check in background - don't block rendering
+    const checkSession = async () => {
+      const session = localStorage.getItem('gokab_session')
+      if (session) {
+        try {
+          const userData = JSON.parse(session)
+          
+          // Validate session has required fields
+          if (userData.phone && userData.role) {
+            // Valid session - redirect immediately
+            setIsRedirecting(true)
+            const redirectPath = userData.role === 'driver' ? '/driver/dashboard' : '/rider/home'
+            // Use requestAnimationFrame to ensure smooth transition
+            requestAnimationFrame(() => {
+              router.replace(redirectPath)
+            })
+            return
+          }
+        } catch (err) {
+          console.error('Failed to parse session:', err)
         }
-      } catch (err) {
-        console.error('Failed to parse session:', err)
       }
+
+      // Mark session as checked - won't check again unless component remounts
+      setSessionChecked(true)
     }
 
-    // Mark session as checked - won't check again unless component remounts
-    setSessionChecked(true)
+    checkSession()
   }, [sessionChecked, router])
 
-  // Don't render form if redirecting
+  // Don't render form if redirecting - just return null for instant redirect
   if (isRedirecting) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin">Redirecting...</div>
-      </div>
-    )
+    return null
   }
 
   const handleTermsAccept = () => {
