@@ -28,21 +28,6 @@ export default function RiderHome() {
     { id: 2, name: 'Munyaradzi', distance: '5 min away', lat: -17.830, lng: 31.025 },
     { id: 3, name: 'Tonderai', distance: '8 min away', lat: -17.815, lng: 31.045 },
   ])
-  const [currentAddress, setCurrentAddress] = useState('Loading location...')
-  const [destination, setDestination] = useState('')
-  const [destinationAddress, setDestinationAddress] = useState('')
-  const [destinationCoords, setDestinationCoords] = useState(null)
-  const [recentLocations, setRecentLocations] = useState([])
-  const [selectedService, setSelectedService] = useState('gokab')
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [editingLocation, setEditingLocation] = useState(false)
-  const [tripInfo, setTripInfo] = useState(null)
-  const [calculatingDistance, setCalculatingDistance] = useState(false)
-  const [nearbyDrivers, setNearbyDrivers] = useState([
-    { id: 1, name: 'Lloyd G.', distance: '2 min away', lat: -17.820, lng: 31.040 },
-    { id: 2, name: 'Munyaradzi', distance: '5 min away', lat: -17.830, lng: 31.025 },
-    { id: 3, name: 'Tonderai', distance: '8 min away', lat: -17.815, lng: 31.045 },
-  ])
 
   const services = [
     { id: 'gokab', name: 'GoKab', description: '2-4 mins' },
