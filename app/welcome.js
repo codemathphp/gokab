@@ -44,7 +44,8 @@ export default function Welcome() {
             role: existingUser.role || 'rider',
             isVerified: true,
           }
-          setUser(userData)
+          
+          // Persist to localStorage
           localStorage.setItem('gokab_session', JSON.stringify(userData))
           const deviceId = localStorage.getItem('gokab_device_id') || ('device_' + Math.random().toString(36).substr(2, 9))
           localStorage.setItem('gokab_device_id', deviceId)
@@ -55,9 +56,13 @@ export default function Welcome() {
               deviceId: deviceId,
             },
           ]))
+          
+          // Update Zustand store directly
+          useAuthStore.setState({ user: userData, sessionPersisted: true })
+          
           console.log('Account found - logging in directly')
           const redirectPath = existingUser.role === 'driver' ? '/driver/dashboard' : '/rider/home'
-          setTimeout(() => router.push(redirectPath), 100)
+          setTimeout(() => router.push(redirectPath), 50)
           return
         }
       } catch (err) {
@@ -118,28 +123,33 @@ export default function Welcome() {
       }
       
       const userData = { phone, name, role: defaultRole, isVerified: true }
-      setUser(userData)
       
       // Persist session with device tracking
       localStorage.setItem('gokab_session', JSON.stringify(userData))
       localStorage.setItem('gokab_session_created', new Date().toISOString())
+      const deviceId = localStorage.getItem('gokab_device_id')
       localStorage.setItem('gokab_device_sessions', JSON.stringify([
         {
           phone,
           lastLogin: new Date().toISOString(),
-          deviceId: localStorage.getItem('gokab_device_id'),
+          deviceId,
         },
       ]))
       
+      // Update Zustand store
+      useAuthStore.setState({ user: userData, sessionPersisted: true })
+      
       console.log('User verified and session created')
       console.log('Redirecting to /rider/home')
-      await router.push('/rider/home')
-      console.log('Redirect completed')
+      
+      // Use setTimeout to ensure state is committed before navigation
+      setTimeout(() => {
+        router.push('/rider/home')
+      }, 50)
     } catch (err) {
       console.error('Full error:', err)
       console.error('Error message:', err.message)
       setError(`Account activation failed. Please try again.`)
-    } finally {
       setLoading(false)
     }
   }
