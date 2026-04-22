@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 'use client'
 
 import { useEffect } from 'react'
@@ -7,7 +9,6 @@ import Link from 'next/link'
 export default function Home() {
   const router = useRouter()
 
-  // Verify session and redirect to appropriate dashboard
   useEffect(() => {
     // Check localStorage for session without using Zustand hook
     const session = localStorage.getItem('gokab_session')
