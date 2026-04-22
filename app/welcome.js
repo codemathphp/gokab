@@ -17,13 +17,12 @@ export default function Welcome() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [isRedirecting, setIsRedirecting] = useState(false)
+  const [sessionChecked, setSessionChecked] = useState(false)
 
-  // Check if user already has a valid session on mount
+  // Check if user already has a valid session on mount - only run once
   useEffect(() => {
-    // Prevent multiple redirect attempts
-    if (sessionStorage.getItem('gokab_redirecting')) {
-      return
-    }
+    // Only check once per component mount
+    if (sessionChecked) return
 
     const session = localStorage.getItem('gokab_session')
     if (session) {
@@ -31,28 +30,22 @@ export default function Welcome() {
         const userData = JSON.parse(session)
         
         // Validate session has required fields
-        if (!userData.phone || !userData.role) {
-          // Corrupted session - clear it
-          localStorage.removeItem('gokab_session')
+        if (userData.phone && userData.role) {
+          // Valid session - redirect immediately and don't render anything
+          setIsRedirecting(true)
+          const redirectPath = userData.role === 'driver' ? '/driver/dashboard' : '/rider/home'
+          // Replace, don't push, to prevent back button returning to welcome
+          router.replace(redirectPath)
           return
         }
-        
-        // Mark as redirecting to prevent infinite loop
-        sessionStorage.setItem('gokab_redirecting', 'true')
-        setIsRedirecting(true)
-        
-        const redirectPath = userData.role === 'driver' ? '/driver/dashboard' : '/rider/home'
-        
-        // Use setTimeout to ensure state updates complete before redirect
-        setTimeout(() => {
-          router.replace(redirectPath)
-        }, 50)
       } catch (err) {
         console.error('Failed to parse session:', err)
-        localStorage.removeItem('gokab_session')
       }
     }
-  }, [router])
+
+    // Mark session as checked - won't check again unless component remounts
+    setSessionChecked(true)
+  }, [sessionChecked, router])
 
   // Don't render form if redirecting
   if (isRedirecting) {

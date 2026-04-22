@@ -14,9 +14,6 @@ export default function DriverDashboard() {
   const [driverStatus, setDriverStatus] = useState('offline')
 
   useEffect(() => {
-    // Clear the redirecting flag now that we're successfully loaded
-    sessionStorage.removeItem('gokab_redirecting')
-
     // Validate session exists and has required fields
     const session = localStorage.getItem('gokab_session')
     if (!session) {
