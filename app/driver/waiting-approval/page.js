@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { useEffect } from 'react'
+import { FiClock } from 'react-icons/fi'
 
 export default function WaitingApproval() {
   const router = useRouter()
@@ -18,7 +19,7 @@ export default function WaitingApproval() {
     <div className="min-h-screen bg-gradient-to-b from-primary to-orange-500 flex items-center justify-center px-4">
       <div className="text-center text-white">
         {/* Illustration */}
-        <div className="mb-8 text-8xl">⏳</div>
+        <div className="mb-8 flex justify-center"><FiClock size={120} /></div>
 
         <h1 className="text-3xl font-bold mb-4">Under Review</h1>
 

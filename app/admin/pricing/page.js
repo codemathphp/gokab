@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { useEffect, useState } from 'react'
 import { DEFAULT_PRICE_PER_KM } from '@/lib/pricing'
+import { FiClipboard, FiCheck, FiAlertCircle } from 'react-icons/fi'
 
 export default function AdminPricing() {
   const router = useRouter()
@@ -232,19 +233,25 @@ export default function AdminPricing() {
 
         {/* Info Section */}
         <div className="bg-blue-50 rounded-xl p-4 border border-blue-200 mb-6">
-          <h3 className="font-bold text-gray-800 mb-3">📋 Pricing Strategy Guide</h3>
+          <div className="flex items-center gap-2 mb-3">
+            <FiClipboard className="text-blue-600" size={20} />
+            <h3 className="font-bold text-gray-800">Pricing Strategy Guide</h3>
+          </div>
           <ul className="text-sm text-gray-700 space-y-2">
-            <li>✓ <span className="font-semibold">Minimum:</span> Lower prices attract more riders, increase driver volume</li>
-            <li>✓ <span className="font-semibold">Default:</span> Applied to all drivers who don't customize their rate</li>
-            <li>✓ <span className="font-semibold">Maximum:</span> Prevents price gouging during peak hours</li>
-            <li>✓ Changes apply to future bookings, not active rides</li>
-            <li>✓ Monitor driver satisfaction and adjust range if needed</li>
+            <li className="flex items-center gap-2"><FiCheck size={18} className="text-green-600 flex-shrink-0" /> <span><span className="font-semibold">Minimum:</span> Lower prices attract more riders, increase driver volume</span></li>
+            <li className="flex items-center gap-2"><FiCheck size={18} className="text-green-600 flex-shrink-0" /> <span><span className="font-semibold">Default:</span> Applied to all drivers who don't customize their rate</span></li>
+            <li className="flex items-center gap-2"><FiCheck size={18} className="text-green-600 flex-shrink-0" /> <span><span className="font-semibold">Maximum:</span> Prevents price gouging during peak hours</span></li>
+            <li className="flex items-center gap-2"><FiCheck size={18} className="text-green-600 flex-shrink-0" /> <span>Changes apply to future bookings, not active rides</span></li>
+            <li className="flex items-center gap-2"><FiCheck size={18} className="text-green-600 flex-shrink-0" /> <span>Monitor driver satisfaction and adjust range if needed</span></li>
           </ul>
         </div>
 
         {/* Warning */}
         <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
-          <h3 className="font-bold text-yellow-800 mb-2">⚠️ Important</h3>
+          <div className="flex items-center gap-2 mb-2">
+            <FiAlertCircle className="text-yellow-700" size={20} />
+            <h3 className="font-bold text-yellow-800">Important</h3>
+          </div>
           <p className="text-sm text-yellow-700">
             Changes to pricing settings will affect all future ride requests. Existing active rides will maintain their original pricing.
           </p>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { FiAlertCircle } from 'react-icons/fi'
 
 export default function Error({ error, reset }) {
   useEffect(() => {
@@ -10,7 +11,7 @@ export default function Error({ error, reset }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary to-orange-500 flex items-center justify-center px-4">
       <div className="text-center text-white max-w-sm">
-        <div className="text-6xl mb-4">⚠️</div>
+        <div className="mb-4 flex justify-center"><FiAlertCircle size={80} /></div>
 
         <h1 className="text-3xl font-bold mb-4">Something Went Wrong</h1>
 

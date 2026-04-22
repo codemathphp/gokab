@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { useEffect } from 'react'
-import { FiUser, FiArrowLeft } from 'react-icons/fi'
+import { FiUser, FiArrowLeft, FiStar } from 'react-icons/fi'
 
 export default function DriverProfile() {
   const router = useRouter()
@@ -38,8 +38,8 @@ export default function DriverProfile() {
         {/* Profile Card */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div className="text-center mb-6">
-            <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-5xl mx-auto mb-4">
-              👤
+            <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+              <FiUser size={64} className="text-white" />
             </div>
             <h2 className="text-2xl font-bold text-secondary">{user?.phone}</h2>
             <p className="text-gray-600">Professional Driver</p>
@@ -47,7 +47,10 @@ export default function DriverProfile() {
 
           {/* Rating */}
           <div className="text-center py-4 border-t border-b border-gray-200 mb-6">
-            <p className="text-3xl font-bold text-primary">4.8 ⭐</p>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <p className="text-3xl font-bold text-primary">4.8</p>
+              <FiStar size={28} className="text-primary fill-primary" />
+            </div>
             <p className="text-gray-600 text-sm">Based on 127 rides</p>
           </div>
 

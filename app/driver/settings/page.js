@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { useEffect, useState } from 'react'
 import { PRICING_RANGE, DEFAULT_PRICE_PER_KM, formatPrice, isValidPrice } from '@/lib/pricing'
+import { FiLightbulb, FiCheck } from 'react-icons/fi'
 
 export default function DriverSettings() {
   const router = useRouter()
@@ -206,13 +207,16 @@ export default function DriverSettings() {
 
         {/* Info Section */}
         <div className="mt-8 bg-blue-50 rounded-xl p-4 border border-blue-200">
-          <h3 className="font-bold text-gray-800 mb-3">💡 How Pricing Works</h3>
+          <div className="flex items-center gap-2 mb-3">
+            <FiLightbulb className="text-blue-600" size={20} />
+            <h3 className="font-bold text-gray-800">How Pricing Works</h3>
+          </div>
           <ul className="text-xs text-gray-700 space-y-2">
-            <li>✓ Your custom rate is used for all ride requests</li>
-            <li>✓ Riders see your rate before booking</li>
-            <li>✓ You can update your rate anytime</li>
-            <li>✓ Higher competitive rates may get fewer requests</li>
-            <li>✓ All rates must stay within the regulated range</li>
+            <li className="flex items-center gap-2"><FiCheck size={16} className="text-green-600 flex-shrink-0" /> Your custom rate is used for all ride requests</li>
+            <li className="flex items-center gap-2"><FiCheck size={16} className="text-green-600 flex-shrink-0" /> Riders see your rate before booking</li>
+            <li className="flex items-center gap-2"><FiCheck size={16} className="text-green-600 flex-shrink-0" /> You can update your rate anytime</li>
+            <li className="flex items-center gap-2"><FiCheck size={16} className="text-green-600 flex-shrink-0" /> Higher competitive rates may get fewer requests</li>
+            <li className="flex items-center gap-2"><FiCheck size={16} className="text-green-600 flex-shrink-0" /> All rates must stay within the regulated range</li>
           </ul>
         </div>
       </div>
