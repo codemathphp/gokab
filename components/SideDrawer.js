@@ -1,11 +1,23 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
 
 export default function SideDrawer({ isOpen, onClose }) {
   const router = useRouter()
-  const { user, logout } = useAuthStore()
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    // Get user info from localStorage
+    const session = localStorage.getItem('gokab_session')
+    if (session) {
+      try {
+        setUser(JSON.parse(session))
+      } catch (err) {
+        console.error('Failed to parse session:', err)
+      }
+    }
+  }, [isOpen])
 
   const handleNavigation = (path) => {
     router.push(path)
@@ -13,7 +25,6 @@ export default function SideDrawer({ isOpen, onClose }) {
   }
 
   const handleLogout = () => {
-    logout()
     localStorage.removeItem('gokab_session')
     router.push('/welcome')
     onClose()
@@ -44,7 +55,8 @@ export default function SideDrawer({ isOpen, onClose }) {
             ✕
           </button>
           <h2 className="text-xl font-bold">goKab</h2>
-          <p className="text-orange-100 text-sm mt-1">{user?.phone}</p>
+          <p className="text-orange-100 text-sm mt-1">{user?.name || 'User'}</p>
+          <p className="text-orange-200 text-xs">{user?.phone}</p>
         </div>
 
         {/* Menu Items */}
