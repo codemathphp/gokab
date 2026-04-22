@@ -46,15 +46,18 @@ export default function Welcome() {
           }
           setUser(userData)
           localStorage.setItem('gokab_session', JSON.stringify(userData))
+          const deviceId = localStorage.getItem('gokab_device_id') || ('device_' + Math.random().toString(36).substr(2, 9))
+          localStorage.setItem('gokab_device_id', deviceId)
           localStorage.setItem('gokab_device_sessions', JSON.stringify([
             {
               phone: formattedPhone,
               lastLogin: new Date().toISOString(),
-              deviceId: localStorage.getItem('gokab_device_id') || 'unknown',
+              deviceId: deviceId,
             },
           ]))
           console.log('Account found - logging in directly')
-          await router.push(existingUser.role === 'driver' ? '/driver/dashboard' : '/rider/home')
+          const redirectPath = existingUser.role === 'driver' ? '/driver/dashboard' : '/rider/home'
+          setTimeout(() => router.push(redirectPath), 100)
           return
         }
       } catch (err) {

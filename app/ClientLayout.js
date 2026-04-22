@@ -1,16 +1,11 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/lib/store'
 
 export default function ClientLayout({ children }) {
-  const { initSession, updateLastActivity } = useAuthStore()
+  const { initSession } = useAuthStore()
   const [mounted, setMounted] = useState(false)
-
-  // Memoize the activity handler to prevent infinite re-renders
-  const handleActivity = useCallback(() => {
-    updateLastActivity()
-  }, [updateLastActivity])
 
   useEffect(() => {
     initSession()
@@ -22,22 +17,22 @@ export default function ClientLayout({ children }) {
         console.log('SW registration failed:', err)
       })
     }
-  }, [initSession])
+  }, [])
 
-  useEffect(() => {
-    // Update last activity on user interaction
-    window.addEventListener('click', handleActivity)
-    window.addEventListener('scroll', handleActivity)
-    window.addEventListener('keydown', handleActivity)
-    window.addEventListener('touchstart', handleActivity)
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin">Loading...</div>
+      </div>
+    )
+  }
 
-    return () => {
-      window.removeEventListener('click', handleActivity)
-      window.removeEventListener('scroll', handleActivity)
-      window.removeEventListener('keydown', handleActivity)
-      window.removeEventListener('touchstart', handleActivity)
-    }
-  }, [handleActivity])
+  return (
+    <div className="min-h-screen max-w-md mx-auto bg-white relative">
+      {children}
+    </div>
+  )
+}
 
   if (!mounted) {
     return (
