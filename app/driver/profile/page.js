@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { useEffect } from 'react'
+import { FiUser, FiArrowLeft } from 'react-icons/fi'
 
 export default function DriverProfile() {
   const router = useRouter()
@@ -24,8 +25,11 @@ export default function DriverProfile() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-primary text-white p-6 pt-8 pb-12">
-        <button onClick={() => router.back()} className="text-xl mb-4">
-          ←
+        <button 
+          onClick={() => router.back()} 
+          className="flex items-center gap-2 mb-4 hover:opacity-80 transition"
+        >
+          <FiArrowLeft size={24} />
         </button>
         <h1 className="text-2xl font-bold">Driver Profile</h1>
       </div>

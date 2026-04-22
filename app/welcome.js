@@ -10,8 +10,9 @@ import { COUNTRIES } from '@/lib/countries'
 export default function Welcome() {
   const router = useRouter()
   const { setUser } = useAuthStore()
-  const [step, setStep] = useState('terms') // terms, phone, verify
+  const [step, setStep] = useState('terms') // terms, phone, verify, name
   const [phone, setPhone] = useState('')
+  const [name, setName] = useState('')
   const [country, setCountry] = useState(COUNTRIES[1]) // Default to Zimbabwe
   const [verificationCode, setVerificationCode] = useState('')
   const [error, setError] = useState('')
@@ -54,21 +55,32 @@ export default function Welcome() {
       return
     }
     
+    setLoading(false)
+    setStep('name')
+  }
+
+  const handleNameSubmit = async () => {
+    setError('')
+    if (!name.trim()) {
+      setError('Please enter your full name')
+      return
+    }
+
     setLoading(true)
     try {
       const defaultRole = 'rider'
-      console.log('Creating user with phone:', phone)
+      console.log('Creating user with phone:', phone, 'and name:', name)
       
       // Try to create in Firebase
       try {
-        await createUser(phone, defaultRole)
+        await createUser(phone, defaultRole, name)
         console.log('User created successfully in Firebase')
       } catch (firebaseErr) {
         console.warn('Firebase creation failed, using localStorage fallback:', firebaseErr.message)
         // Fallback: still allow login with localStorage only
       }
       
-      const userData = { phone, role: defaultRole, isVerified: true }
+      const userData = { phone, name, role: defaultRole, isVerified: true }
       setUser(userData)
       localStorage.setItem('gokab_session', JSON.stringify(userData))
       
@@ -108,6 +120,16 @@ export default function Welcome() {
           phone={phone}
           verificationCode={verificationCode}
           onVerify={handleCodeVerify}
+          error={error}
+          loading={loading}
+        />
+      )}
+
+      {step === 'name' && (
+        <NameInput
+          name={name}
+          setName={setName}
+          onSubmit={handleNameSubmit}
           error={error}
           loading={loading}
         />
@@ -299,6 +321,53 @@ function VerifyCode({ phone, verificationCode, onVerify, error, loading }) {
       >
         {loading ? 'Activating...' : 'Activate Account'}
       </button>
+    </div>
+  )
+}
+
+function NameInput({ name, setName, onSubmit, error, loading }) {
+  return (
+    <div className="w-full max-w-sm">
+      {/* Logo */}
+      <div className="mb-8 text-center">
+        <img
+          src="/main_logo.png"
+          alt="goKab"
+          className="w-32 h-20 mx-auto mb-2 object-contain"
+        />
+      </div>
+
+      <h3 className="text-lg font-bold text-secondary mb-2 text-center">Complete Your Profile</h3>
+      <p className="text-gray-600 text-sm mb-6 text-center">Please enter your full name to complete setup</p>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-3 mb-4 rounded text-sm">
+          {error}
+        </div>
+      )}
+
+      <div className="mb-6">
+        <label className="block text-gray-700 font-semibold mb-2 text-sm">Full Name</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter your full name"
+          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary transition-colors text-gray-800 bg-white"
+        />
+      </div>
+
+      <button
+        onClick={onSubmit}
+        disabled={loading || !name.trim()}
+        className="w-full py-4 bg-primary text-white rounded-full font-semibold text-base hover:bg-orange-600 disabled:opacity-60 transition-colors"
+      >
+        {loading ? 'Setting up...' : 'Continue to Home'}
+      </button>
+
+      <p className="text-gray-500 text-xs text-center mt-4">
+        Your name helps us provide better service
+      </p>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore, useAdminStore } from '@/lib/store'
 import { approveDriver, rejectDriver } from '@/lib/firebaseServices'
+import { FiClipboard, FiUsers, FiTruck, FiDollarSign } from 'react-icons/fi'
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -88,39 +89,39 @@ export default function AdminDashboard() {
       <div className="max-w-2xl mx-auto mt-6 px-4 flex gap-2 mb-6">
         <button
           onClick={() => setActiveTab('drivers')}
-          className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+          className={`px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
             activeTab === 'drivers'
               ? 'bg-primary text-white'
               : 'bg-white text-secondary hover:bg-gray-100'
           }`}
         >
-          📋 Drivers
+          <FiClipboard size={18} /> Drivers
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+          className={`px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
             activeTab === 'users'
               ? 'bg-primary text-white'
               : 'bg-white text-secondary hover:bg-gray-100'
           }`}
         >
-          👥 Users
+          <FiUsers size={18} /> Users
         </button>
         <button
           onClick={() => setActiveTab('rides')}
-          className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+          className={`px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
             activeTab === 'rides'
               ? 'bg-primary text-white'
               : 'bg-white text-secondary hover:bg-gray-100'
           }`}
         >
-          🚗 Rides
+          <FiTruck size={18} /> Rides
         </button>
         <button
           onClick={() => router.push('/admin/pricing')}
-          className="px-6 py-2 rounded-lg font-semibold transition-colors bg-green-100 text-green-700 hover:bg-green-200"
+          className="px-6 py-2 rounded-lg font-semibold transition-colors bg-green-100 text-green-700 hover:bg-green-200 flex items-center gap-2"
         >
-          💰 Pricing
+          <FiDollarSign size={18} /> Pricing
         </button>
       </div>
 

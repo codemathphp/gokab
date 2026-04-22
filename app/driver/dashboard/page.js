@@ -4,12 +4,16 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore, useDriverStore } from '@/lib/store'
 import MapComponent from '@/components/MapComponent'
+import SideDrawer from '@/components/SideDrawer'
+import TopBar from '@/components/TopBar'
+import { FiUser } from 'react-icons/fi'
 
 export default function DriverDashboard() {
   const router = useRouter()
   const { user, logout } = useAuthStore()
   const { driverStatus, setDriverStatus } = useDriverStore()
   const [location, setLocation] = useState(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
     if (!user || user.role !== 'driver') {
@@ -43,29 +47,22 @@ export default function DriverDashboard() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header with Status Toggle */}
-      <div className="bg-gradient-to-r from-primary to-orange-500 text-white p-4 pt-6 rounded-b-3xl">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">goKab Driver</h1>
-          <button
-            onClick={() => router.push('/driver/profile')}
-            className="text-2xl hover:opacity-80 transition"
-          >
-            👤
-          </button>
-        </div>
+      {/* Top Bar */}
+      <TopBar onMenuClick={() => setIsDrawerOpen(true)} />
 
-        {/* Status Toggle */}
-        <div className="flex items-center gap-4">
+      {/* Status Card */}
+      <div className="bg-gradient-to-r from-primary to-orange-500 text-white p-6 m-4 rounded-2xl">
+        <div className="flex justify-between items-center mb-4">
           <div>
-            <p className="text-sm text-white text-opacity-90">Status</p>
-            <p className="text-2xl font-bold">
-              {driverStatus === 'online' ? '🟢 Online' : '🔴 Offline'}
+            <p className="text-sm text-white text-opacity-90 mb-1">Status</p>
+            <p className="text-2xl font-bold flex items-center gap-2">
+              <div className={`w-4 h-4 rounded-full ${driverStatus === 'online' ? 'bg-green-400' : 'bg-gray-400'}`}></div>
+              {driverStatus === 'online' ? 'Online' : 'Offline'}
             </p>
           </div>
           <button
             onClick={toggleOnlineStatus}
-            className={`ml-auto px-6 py-2 rounded-full font-bold text-sm transition-colors ${
+            className={`px-6 py-2 rounded-full font-bold text-sm transition-colors ${
               driverStatus === 'online'
                 ? 'bg-white bg-opacity-30 hover:bg-opacity-40'
                 : 'bg-white text-primary hover:bg-opacity-90'
@@ -76,8 +73,7 @@ export default function DriverDashboard() {
         </div>
       </div>
 
-      {/* Map */}
-      <div className="h-64 bg-gray-200 relative">
+      <SideDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
         {location && <MapComponent center={location} />}
       </div>
 

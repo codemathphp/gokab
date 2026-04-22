@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore, useRideStore } from '@/lib/store'
 import MapComponent from '@/components/MapComponent'
 import { useEffect } from 'react'
+import { FiCar, FiStar, FiPhone, FiMessageCircle } from 'react-icons/fi'
 
 export default function RiderDriverFound() {
   const router = useRouter()
@@ -35,17 +36,17 @@ export default function RiderDriverFound() {
 
       {/* Bottom Sheet */}
       <div className="flex-1 bg-white rounded-t-3xl -mt-6 relative z-10 p-6 flex flex-col">
-        <h2 className="text-2xl font-bold text-secondary mb-4">Driver Found!</h2>
+        <h2 className="text-2xl font-bold text-secondary mb-4">Driver on the Way</h2>
 
         {/* Driver Card */}
         <div className="bg-gradient-to-r from-primary to-orange-500 text-white rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-white bg-opacity-30 rounded-full flex items-center justify-center text-2xl">
-              🚗
+            <div className="w-16 h-16 bg-white bg-opacity-30 rounded-full flex items-center justify-center">
+              <FiCar className="text-white" size={32} />
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold">{driver.name}</h3>
-              <p className="text-white text-opacity-90">⭐ {driver.rating}</p>
+              <p className="text-white text-opacity-90 flex items-center gap-1"><FiStar size={16} /> {driver.rating}</p>
             </div>
           </div>
 
@@ -66,11 +67,11 @@ export default function RiderDriverFound() {
 
         {/* Contact */}
         <div className="flex gap-3 mb-6">
-          <button className="flex-1 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-colors">
-            📞 Call
+          <button className="flex-1 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+            <FiPhone size={18} /> Call
           </button>
-          <button className="flex-1 py-3 bg-gray-100 text-secondary rounded-xl font-semibold hover:bg-gray-200 transition-colors">
-            💬 Message
+          <button className="flex-1 py-3 bg-gray-100 text-secondary rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+            <FiMessageCircle size={18} /> Message
           </button>
         </div>
 

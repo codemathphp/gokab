@@ -4,7 +4,15 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore, useRideStore } from '@/lib/store'
 import { useEffect, useState } from 'react'
 import MapComponent from '@/components/MapComponent'
-import { calculateFare, DEFAULT_PRICE_PER_KM, formatPrice } from '@/lib/pricing'
+import { 
+  calculateDistanceAndDuration, 
+  calculateFareForDriver, 
+  formatPrice,
+  getDistanceEstimate,
+  getDurationEstimate 
+} from '@/lib/distanceAndPricingService'
+import { getDriver } from '@/lib/firebaseServices'
+import { FiArrowLeft, FiCar, FiStar, FiUser, FiTrendingDown, FiLoader } from 'react-icons/fi'
 
 export default function RiderSearchResults() {
   const router = useRouter()
@@ -13,43 +21,39 @@ export default function RiderSearchResults() {
   const [pickupLocation, setPickupLocation] = useState(null)
   const [destination, setDestination] = useState(null)
   const [distance, setDistance] = useState(0)
+  const [duration, setDuration] = useState(0)
   const [drivers, setDrivers] = useState([])
   const [selectedDriver, setSelectedDriver] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  // Mock drivers with custom pricing
+  // Mock drivers list - in real app, fetch from Firebase
   const mockDrivers = [
     {
       id: 1,
       name: 'Lloyd Gutu',
       rating: 5.0,
       rides: 4,
-      distance: '1 Minute Away',
       vehicle: 'Honda Fit New Hybrid Shape',
       plate: 'Ae478 - 388',
       phone: '+263 77 123 4567',
-      pricePerKm: 1.50, // Using default
     },
     {
       id: 2,
       name: 'Munyaradzi',
       rating: 4.8,
       rides: 4,
-      distance: '5 Minute Away',
       vehicle: 'Toyota Vits',
       plate: 'TY489 - 221',
       phone: '+263 77 234 5678',
-      pricePerKm: 1.75, // Custom price
     },
     {
       id: 3,
       name: 'Tonderai',
       rating: 5.0,
       rides: 4,
-      distance: '10 Minutes Away',
       vehicle: 'Mercedes Benz',
       plate: 'MB555 - 666',
       phone: '+263 77 345 6789',
-      pricePerKm: 2.00, // Custom premium price
     },
   ]
 
@@ -59,26 +63,62 @@ export default function RiderSearchResults() {
       return
     }
 
-    // Get location from session/store
-    const session = JSON.parse(localStorage.getItem('gokab_ride_context') || '{}')
-    if (!session.pickup || !session.destination) {
-      router.push('/rider/home')
-      return
+    const initializeRide = async () => {
+      try {
+        // Get location from session/store
+        const session = JSON.parse(localStorage.getItem('gokab_ride_context') || '{}')
+        if (!session.pickup || !session.destination) {
+          router.push('/rider/home')
+          return
+        }
+
+        setPickupLocation(session.pickup)
+        setDestination(session.destination)
+
+        // Calculate actual distance and duration
+        const distanceData = await calculateDistanceAndDuration(session.pickup, session.destination)
+        setDistance(parseFloat(distanceData.distance) || 0)
+        setDuration(parseInt(distanceData.duration) || 0)
+
+        // Process drivers with real rates
+        const driversWithFares = await Promise.all(
+          mockDrivers.map(async (driver) => {
+            try {
+              // Get driver's custom rate from Firebase if available
+              const driverData = await getDriver(driver.phone)
+              const driverRate = driverData?.ratePerKm || null
+
+              // Calculate fare using driver's rate or default
+              const price = await calculateFareForDriver(distanceData.distance, driverRate)
+
+              return {
+                ...driver,
+                price,
+                ratePerKm: driverRate,
+                distance: distanceData.durationText,
+              }
+            } catch (error) {
+              console.error(`Error processing driver ${driver.name}:`, error)
+              const price = await calculateFareForDriver(distanceData.distance)
+              return {
+                ...driver,
+                price,
+                distance: distanceData.durationText,
+              }
+            }
+          })
+        )
+
+        setDrivers(driversWithFares)
+      } catch (error) {
+        console.error('Error initializing ride:', error)
+        setDrivers(mockDrivers.map((d) => ({ ...d, price: '$2.50', distance: 'N/A' })))
+      } finally {
+        setLoading(false)
+      }
     }
 
-    setPickupLocation(session.pickup)
-    setDestination(session.destination)
-    
-    // Mock distance calculation (in real app, use Google Distance Matrix API)
-    const mockDistance = 5.2 // km
-    setDistance(mockDistance)
-
-    // Process drivers data with calculated fares
-    const driversWithFares = mockDrivers.map((driver) => ({
-      ...driver,
-      price: calculateFare(mockDistance, driver.pricePerKm),
-    }))
-    setDrivers(driversWithFares)
+    initializeRide()
   }, [user, router])
 
   const handleRequestRide = (driver) => {
@@ -102,13 +142,16 @@ export default function RiderSearchResults() {
       status: 'requested',
     })
 
-    router.push('/rider/searching')
+    router.push('/rider/requesting')
   }
 
   if (!pickupLocation) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <p>Loading...</p>
+        <div className="text-center">
+          <FiLoader className="animate-spin text-orange-500 text-4xl mx-auto mb-4" />
+          <p className="text-gray-600">Loading available drivers...</p>
+        </div>
       </div>
     )
   }
@@ -119,9 +162,9 @@ export default function RiderSearchResults() {
       <div className="bg-white border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-20">
         <button
           onClick={() => router.back()}
-          className="text-2xl hover:opacity-70 transition"
+          className="hover:opacity-70 transition"
         >
-          ←
+          <FiArrowLeft size={24} className="text-gray-800" />
         </button>
         <h1 className="text-xl font-bold text-secondary flex-1 text-center">Available Drivers</h1>
         <div className="w-8"></div>
@@ -156,12 +199,12 @@ export default function RiderSearchResults() {
       <div className="mx-4 mt-4 bg-white rounded-xl p-4 border border-gray-200">
         <div className="flex items-start gap-3 mb-3">
           <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-lg flex-shrink-0">
-            🚗
+            <FiCar className="text-orange-600" size={20} />
           </div>
           <div className="flex-1">
             <p className="font-bold text-gray-800">GoKab</p>
-            <p className="text-sm text-gray-600">2min Away</p>
-            <p className="text-xs text-gray-500">Full {drivers.length} Drivers</p>
+            <p className="text-sm text-gray-600">{getDistanceEstimate(distance)}</p>
+            <p className="text-xs text-gray-500">{drivers.length} Drivers Available</p>
           </div>
         </div>
 
@@ -170,9 +213,9 @@ export default function RiderSearchResults() {
             <div>
               <p className="text-xs text-gray-600 mb-1">Best Fare</p>
               <p className="text-3xl font-bold text-secondary">
-                {formatPrice(Math.min(...drivers.map((d) => parseFloat(d.price))))}
+                {drivers.length > 0 ? formatPrice(Math.min(...drivers.map((d) => parseFloat(d.price.replace('$', ''))))) : '$0.00'}
               </p>
-              <p className="text-xs text-gray-500">Closest Drivers</p>
+              <p className="text-xs text-gray-500">{getDurationEstimate(duration)}</p>
             </div>
             <button className="px-6 py-2 bg-red-500 text-white rounded-full text-sm font-bold hover:bg-red-600 transition">
               Negotiate
@@ -200,8 +243,8 @@ export default function RiderSearchResults() {
           >
             <div className="flex items-start gap-3 mb-3">
               {/* Driver Avatar */}
-              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-xl flex-shrink-0 border-2 border-gray-400">
-                👤
+              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0 border-2 border-gray-400">
+                <FiUser className="text-gray-700" size={20} />
               </div>
 
               {/* Driver Info */}
@@ -209,7 +252,7 @@ export default function RiderSearchResults() {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-bold text-gray-800">
-                      {driver.name} <span className="text-orange-500 text-lg">⭐ {driver.rating}</span>
+                      {driver.name} <span className="text-orange-500 text-sm ml-1"><FiStar size={14} className="inline mr-1" />{driver.rating}</span>
                     </p>
                     <p className="text-xs text-gray-600 mt-1">{driver.distance}</p>
                     <p className="text-xs text-orange-600 font-semibold mt-2">{driver.vehicle}</p>
