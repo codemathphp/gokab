@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+// Vercel rebuild trigger - v2024-04-22
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
