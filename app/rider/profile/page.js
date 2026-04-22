@@ -1,5 +1,8 @@
 'use client'
 
+// Make this page dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import TopBar from '@/components/TopBar'

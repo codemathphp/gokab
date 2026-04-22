@@ -1,5 +1,8 @@
 'use client'
 
+// Make this page dynamic (not statically generated)
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import MapComponent from '@/components/MapComponent'
