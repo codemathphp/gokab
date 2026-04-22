@@ -1,24 +1,38 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { FiUser, FiArrowLeft, FiStar } from 'react-icons/fi'
 
 export default function DriverProfile() {
   const router = useRouter()
-  const { user, logout } = useAuthStore()
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
-    if (!user || user.role !== 'driver') {
-      router.push('/welcome')
+    // Get user from localStorage
+    const session = localStorage.getItem('gokab_session')
+    if (!session) {
+      router.replace('/welcome')
+      return
     }
-  }, [user, router])
+
+    try {
+      const userData = JSON.parse(session)
+      if (!userData.phone || !userData.role || userData.role !== 'driver') {
+        localStorage.removeItem('gokab_session')
+        router.replace('/welcome')
+        return
+      }
+      setUser(userData)
+    } catch (err) {
+      localStorage.removeItem('gokab_session')
+      router.replace('/welcome')
+    }
+  }, [router])
 
   const handleLogout = () => {
-    logout()
     localStorage.removeItem('gokab_session')
-    router.push('/welcome')
+    router.replace('/welcome')
   }
 
   return (
