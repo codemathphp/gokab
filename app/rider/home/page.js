@@ -63,15 +63,28 @@ export default function RiderHome() {
 
     // Get current location and reverse geocode it
     const initializeLocation = async () => {
-      const currentLoc = await getCurrentLocation()
-      setLocation(currentLoc)
-      
-      // Reverse geocode to get address
-      const address = await reverseGeocode(currentLoc.lat, currentLoc.lng)
-      setCurrentAddress(address)
-      
-      // Load recent locations
-      setRecentLocations(getRecentLocations())
+      try {
+        const currentLoc = await getCurrentLocation()
+        setLocation(currentLoc)
+        
+        // Reverse geocode to get address (won't block if fails)
+        try {
+          const address = await reverseGeocode(currentLoc.lat, currentLoc.lng)
+          setCurrentAddress(address)
+        } catch (geocodeErr) {
+          // Use coordinates as fallback
+          setCurrentAddress(`${currentLoc.lat.toFixed(4)}, ${currentLoc.lng.toFixed(4)}`)
+        }
+        
+        // Load recent locations
+        setRecentLocations(getRecentLocations())
+      } catch (locErr) {
+        console.error('Failed to initialize location:', locErr)
+        // Set default location if geolocation fails
+        setLocation({ lat: -17.825, lng: 31.033, accuracy: null })
+        setCurrentAddress('Harare')
+        setRecentLocations(getRecentLocations())
+      }
     }
 
     initializeLocation()

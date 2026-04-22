@@ -14,22 +14,25 @@ export async function GET(request) {
       {
         headers: {
           'User-Agent': 'GoKab-App/1.0'
-        }
+        },
+        signal: AbortSignal.timeout(5000) // 5 second timeout
       }
     )
 
     if (!response.ok) {
-      throw new Error('Geocoding API error')
+      // Return default if API fails
+      return Response.json({ address: `${lat.toFixed(4)}, ${lng.toFixed(4)}` })
     }
 
     const data = await response.json()
     const address = data.address?.road 
       ? `${data.address.road}${data.address.house_number ? ' ' + data.address.house_number : ''}, ${data.address.city || data.address.town || ''}`
-      : data.display_name || `${lat}, ${lng}`
+      : data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`
 
     return Response.json({ address })
   } catch (error) {
-    console.error('Reverse geocoding error:', error)
-    return Response.json({ address: `${lat}, ${lng}` })
+    // Fallback to coordinates if any error occurs
+    console.warn('Reverse geocoding error:', error.message)
+    return Response.json({ address: `${lat.toFixed(4)}, ${lng.toFixed(4)}` })
   }
 }
