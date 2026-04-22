@@ -37,6 +37,9 @@ export default function RiderHome() {
   ]
 
   useEffect(() => {
+    // Clear the redirecting flag now that we're successfully loaded
+    sessionStorage.removeItem('gokab_redirecting')
+
     if (!user || user.role !== 'rider') {
       router.push('/welcome')
       return

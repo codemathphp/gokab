@@ -16,6 +16,9 @@ export default function DriverDashboard() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
+    // Clear the redirecting flag now that we're successfully loaded
+    sessionStorage.removeItem('gokab_redirecting')
+
     if (!user || user.role !== 'driver') {
       router.push('/welcome')
     }

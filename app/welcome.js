@@ -20,11 +20,17 @@ export default function Welcome() {
 
   // Check if user already has a valid session on mount
   useEffect(() => {
+    // Prevent multiple redirect attempts
+    if (sessionStorage.getItem('gokab_redirecting')) {
+      return
+    }
+
     const session = localStorage.getItem('gokab_session')
     if (session) {
       try {
         const userData = JSON.parse(session)
-        console.log('User already has session, redirecting to home')
+        // Mark as redirecting to prevent infinite loop
+        sessionStorage.setItem('gokab_redirecting', 'true')
         setIsRedirecting(true)
         const redirectPath = userData.role === 'driver' ? '/driver/dashboard' : '/rider/home'
         router.replace(redirectPath)
