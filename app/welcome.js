@@ -9,11 +9,12 @@ import { useAuthStore } from '@/lib/store'
 
 export default function Welcome() {
   const router = useRouter()
-  const [step, setStep] = useState('terms') // terms, phone, verify, name
+  const [step, setStep] = useState('terms') // terms, phone, setup
   const [phone, setPhone] = useState('')
   const [name, setName] = useState('')
   const [country, setCountry] = useState(COUNTRIES[1]) // Default to Zimbabwe
   const [verificationCode, setVerificationCode] = useState('')
+  const [enteredCode, setEnteredCode] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -92,7 +93,9 @@ export default function Welcome() {
       const code = generateVerificationCode()
       setVerificationCode(code)
       setPhone(formattedPhone)
-      setStep('verify')
+      setEnteredCode('')
+      setName('')
+      setStep('setup')
     } catch (err) {
       console.error(err)
       setError('Please enter a valid phone number')
@@ -101,21 +104,16 @@ export default function Welcome() {
     }
   }
 
-  const handleCodeVerify = async (enteredCode) => {
+  const handleCodeVerify = async () => {
     setError('')
     
-    // Validate the entered code matches the generated code
+    // Validate code
     if (enteredCode !== verificationCode) {
       setError('Incorrect verification code. Please try again.')
       return
     }
     
-    setLoading(false)
-    setStep('name')
-  }
-
-  const handleNameSubmit = async () => {
-    setError('')
+    // Validate name
     if (!name.trim()) {
       setError('Please enter your full name')
       return
@@ -188,21 +186,15 @@ export default function Welcome() {
         />
       )}
 
-      {step === 'verify' && (
-        <VerifyCode
+      {step === 'setup' && (
+        <SetupPage
           phone={phone}
           verificationCode={verificationCode}
-          onVerify={handleCodeVerify}
-          error={error}
-          loading={loading}
-        />
-      )}
-
-      {step === 'name' && (
-        <NameInput
+          enteredCode={enteredCode}
+          setEnteredCode={setEnteredCode}
           name={name}
           setName={setName}
-          onSubmit={handleNameSubmit}
+          onSubmit={handleCodeVerify}
           error={error}
           loading={loading}
         />
@@ -334,22 +326,16 @@ function PhoneInput({ phone, setPhone, country, setCountry, onSubmit, error, loa
   )
 }
 
-function VerifyCode({ phone, verificationCode, onVerify, error, loading }) {
-  const [code, setCode] = useState('')
-
+function SetupPage({ phone, verificationCode, enteredCode, setEnteredCode, name, setName, onSubmit, error, loading }) {
   const handleCodeChange = (value) => {
     const numericValue = value.replace(/\D/g, '')
-    setCode(numericValue)
-  }
-
-  const handleVerify = () => {
-    onVerify(code)
+    setEnteredCode(numericValue)
   }
 
   return (
     <div className="w-full max-w-sm">
       {/* Logo */}
-      <div className="mb-8 text-center">
+      <div className="mb-6 text-center">
         <img
           src="/main_logo.png"
           alt="goKab"
@@ -357,8 +343,8 @@ function VerifyCode({ phone, verificationCode, onVerify, error, loading }) {
         />
       </div>
 
-      <h3 className="text-lg font-bold text-secondary mb-2 text-center">Activate Your Account</h3>
-      <p className="text-gray-600 text-sm mb-6 text-center">Enter the verification code to activate your account</p>
+      <h3 className="text-lg font-bold text-secondary mb-2 text-center">Account Setup</h3>
+      <p className="text-gray-600 text-sm mb-6 text-center">Verify your code and complete your profile</p>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 p-3 mb-4 rounded text-sm">
@@ -366,81 +352,48 @@ function VerifyCode({ phone, verificationCode, onVerify, error, loading }) {
         </div>
       )}
 
-      {/* Display the verification code */}
-      <div className="bg-gray-100 p-4 rounded-lg mb-6 text-center">
-        <p className="text-gray-600 text-xs mb-2">Your Verification Code</p>
-        <p className="text-3xl font-bold text-primary tracking-wider">{verificationCode}</p>
+      {/* Verification Code Display - Reduced Size */}
+      <div className="bg-gray-100 p-3 rounded-lg mb-4 text-center">
+        <p className="text-gray-600 text-xs mb-1">Verification Code</p>
+        <p className="text-xl font-bold text-primary tracking-wide">{verificationCode}</p>
       </div>
 
-      <div className="mb-6">
+      {/* Code Input */}
+      <div className="mb-5">
+        <label className="block text-gray-700 font-semibold mb-2 text-xs">Enter Code</label>
         <input
           type="text"
-          value={code}
+          value={enteredCode}
           onChange={(e) => handleCodeChange(e.target.value)}
           placeholder="000000"
           maxLength="6"
-          className="w-full px-4 py-3 border-b border-gray-300 focus:outline-none focus:border-primary text-center text-2xl font-bold tracking-wider text-gray-800 bg-transparent"
+          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary text-center text-lg font-semibold tracking-wider text-gray-800 bg-white"
         />
       </div>
 
-      <p className="text-gray-500 text-xs text-center mb-6">
-        Enter the 6-digit code above to verify
-      </p>
-
-      <button
-        onClick={handleVerify}
-        disabled={loading || code.length !== 6}
-        className="w-full py-4 bg-primary text-white rounded-full font-semibold text-base hover:bg-orange-600 disabled:opacity-60 transition-colors"
-      >
-        {loading ? 'Activating...' : 'Activate Account'}
-      </button>
-    </div>
-  )
-}
-
-function NameInput({ name, setName, onSubmit, error, loading }) {
-  return (
-    <div className="w-full max-w-sm">
-      {/* Logo */}
-      <div className="mb-8 text-center">
-        <img
-          src="/main_logo.png"
-          alt="goKab"
-          className="w-32 h-20 mx-auto mb-2 object-contain"
-        />
-      </div>
-
-      <h3 className="text-lg font-bold text-secondary mb-2 text-center">Complete Your Profile</h3>
-      <p className="text-gray-600 text-sm mb-6 text-center">Please enter your full name to complete setup</p>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-3 mb-4 rounded text-sm">
-          {error}
-        </div>
-      )}
-
+      {/* Name Input */}
       <div className="mb-6">
-        <label className="block text-gray-700 font-semibold mb-2 text-sm">Full Name</label>
+        <label className="block text-gray-700 font-semibold mb-2 text-xs">Full Name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter your full name"
-          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary transition-colors text-gray-800 bg-white"
+          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary text-gray-800 bg-white"
         />
       </div>
 
       <button
         onClick={onSubmit}
-        disabled={loading || !name.trim()}
-        className="w-full py-4 bg-primary text-white rounded-full font-semibold text-base hover:bg-orange-600 disabled:opacity-60 transition-colors"
+        disabled={loading || enteredCode.length !== 6 || !name.trim()}
+        className="w-full py-3 bg-primary text-white rounded-full font-semibold text-base hover:bg-orange-600 disabled:opacity-60 transition-colors"
       >
-        {loading ? 'Setting up...' : 'Continue to Home'}
+        {loading ? 'Setting up...' : 'Continue to App'}
       </button>
 
       <p className="text-gray-500 text-xs text-center mt-4">
-        Your name helps us provide better service
+        Both fields are required to continue
       </p>
     </div>
-  )
+  }
 }
