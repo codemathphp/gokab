@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import Link from 'next/link'
+import { useLocalSession } from '@/lib/store'
 
 export default function Home() {
   const router = useRouter()

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { generateVerificationCode, formatPhone } from '@/lib/utils'
 import { createUser, getUser } from '@/lib/firebaseServices'
 import { COUNTRIES } from '@/lib/countries'
+import { useAuthStore } from '@/lib/store'
 
 export default function Welcome() {
   const router = useRouter()
@@ -15,6 +16,21 @@ export default function Welcome() {
   const [verificationCode, setVerificationCode] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Check if user already has a valid session on mount
+  useEffect(() => {
+    const session = localStorage.getItem('gokab_session')
+    if (session) {
+      try {
+        const userData = JSON.parse(session)
+        console.log('User already has session, redirecting to home')
+        const redirectPath = userData.role === 'driver' ? '/driver/dashboard' : '/rider/home'
+        router.replace(redirectPath)
+      } catch (err) {
+        console.error('Failed to parse session:', err)
+      }
+    }
+  }, [])
 
   const handleTermsAccept = () => {
     setStep('phone')
@@ -43,10 +59,15 @@ export default function Welcome() {
             isVerified: true,
           }
           
+          // Generate device ID if not exists
+          if (!localStorage.getItem('gokab_device_id')) {
+            const deviceId = 'device_' + Math.random().toString(36).substr(2, 9)
+            localStorage.setItem('gokab_device_id', deviceId)
+          }
+          
           // Save to localStorage directly
           localStorage.setItem('gokab_session', JSON.stringify(userData))
-          const deviceId = localStorage.getItem('gokab_device_id') || ('device_' + Math.random().toString(36).substr(2, 9))
-          localStorage.setItem('gokab_device_id', deviceId)
+          const deviceId = localStorage.getItem('gokab_device_id')
           localStorage.setItem('gokab_device_sessions', JSON.stringify([
             {
               phone: formattedPhone,
@@ -54,6 +75,9 @@ export default function Welcome() {
               deviceId: deviceId,
             },
           ]))
+          
+          // Update Zustand store
+          useAuthStore.setState({ user: userData, sessionPersisted: true })
           
           console.log('Account found - logging in directly')
           const redirectPath = existingUser.role === 'driver' ? '/driver/dashboard' : '/rider/home'
@@ -130,10 +154,13 @@ export default function Welcome() {
         },
       ]))
       
+      // Update Zustand store
+      useAuthStore.setState({ user: userData, sessionPersisted: true })
+      
       console.log('User verified and session created')
       console.log('Redirecting to /rider/home')
       
-      // Navigate after a small delay to ensure storage is written
+      // Navigate after state update
       router.push('/rider/home')
     } catch (err) {
       console.error('Full error:', err)
